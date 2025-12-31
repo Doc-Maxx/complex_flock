@@ -38,21 +38,21 @@ class rectangle(region):
     def __init__(self, point_2, thickness):
         self.thickness = thickness
         self.diff = point_2 - origin
+        self.angle = np.angle(self.diff)
         self.extrusion = self.thickness * (self.diff / abs(self.diff)) * 1j
         self.points = [origin, point_2, origin + self.extrusion, point_2 + self.extrusion]
         self.slope = self.diff.imag / (self.diff.real + self.eps)
-        self.y_intercepts = self.find_line_intercepts
+        self.rotated_points = self.points * np.e**(-1j * self.angle) 
 
-    def find_line_intercepts(self):
-        m = self.slope
-        slopes = [m,-m,m,-m]
-        values =  [] 
-        for i in range(len(self.points)):
-            values.append(find_line_intercept(self.points[i],slope[i]))
-        return values
+    def rotate_points(self, points):
+        return points * np.e**(-1j * self.angle)
 
     def point_Within(self, point):
-        return 
+        point_check = rotate_points(point)
+        hori_check = self.rotated.points[0].real < point_check.real < self.rotated_points[1].real
+        vert_check = self.rotated_points[0].imag < point_check.imag < self.rotated_points[1].imag
+        return hori_check and vert_check
+
     def vec_within:
 
 class wall:
