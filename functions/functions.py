@@ -14,6 +14,7 @@ class region:
 class circle(region):
     def __init__(self, radius):
         self.radius = radius 
+        self.type = "circle"
 
     def point_Within(self, point):
         return (point.real - origin.real)**2 + (point.imag - origin.imag)**2 < self.radius**2
@@ -42,6 +43,7 @@ class rectangle(region):
     def point_Within(self, point):
         return 
     def vec_within:
+
 class wall:
     def __init__(self, point_1, point_2, thickness):
         self.points = [point_1, point_2]
