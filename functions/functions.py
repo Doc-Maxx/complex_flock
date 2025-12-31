@@ -34,11 +34,22 @@ class circle(region):
         intersection_point = x_int + y_int*1j
         return intersection_point
 
-
 class rectangle(region):
-      def __init__(self, point_2, thickness):
+    def __init__(self, point_2, thickness):
         self.thickness = thickness
-        self.points = [origin, point_2]
+        self.diff = point_2 - origin
+        self.extrusion = self.thickness * (self.diff / abs(self.diff)) * 1j
+        self.points = [origin, point_2, origin + self.extrusion, point_2 + self.extrusion]
+        self.slope = self.diff.imag / (self.diff.real + self.eps)
+        self.y_intercepts = self.find_line_intercepts
+
+    def find_line_intercepts(self):
+        m = self.slope
+        slopes = [m,-m,m,-m]
+        values =  [] 
+        for i in range(len(self.points)):
+            values.append(find_line_intercept(self.points[i],slope[i]))
+        return values
 
     def point_Within(self, point):
         return 
@@ -60,3 +71,6 @@ class wall:
             return 0 + self.y_intercept * 1j
         else:   
             return self.x_intercept + 0j
+
+def find_line_intercept(point, slope):
+    return point.imag - slope * point.real
