@@ -53,8 +53,14 @@ class rectangle(region):
         vert_check = self.rotated_points[0].imag < point_check.imag < self.rotated_points[1].imag
         return hori_check and vert_check
 
-    def vec_within:
-
+    def vec_within(self, pos_vec):
+        rotate_vec = rotate_points(pos_vec)
+        return np.where(    
+                        self.rotated_points[0].real < rotate_vec.real < self.rotated_points[1].real
+                        and self.rotated_points[0].imag < rotate_vec.imag < self.rotated_points[1].imag,
+                        True, False
+                        )
+        
 class wall:
     def __init__(self, point_1, point_2, thickness):
         self.points = [point_1, point_2]
