@@ -1,10 +1,9 @@
 import numpy as np
 
 class space:
-    def __init__(self, walls, connections):
-        self.walls = walls
-        self.connections = connections
-        
+    def __init__(self, regions, manifest):
+        self.regions = regions
+        self.manifest = manifest
 
 class region:
     def __init__(self, type=='empty', origin==0+0j, eps == 0.0001)
@@ -33,7 +32,7 @@ class circle(region):
         y_int = slope*x_int + shifted_point.imag - slope*shifted_point.real
         intersection_point = x_int + y_int*1j
         return intersection_point
-
+  
 class rectangle(region):
     def __init__(self, point_2, thickness):
         self.thickness = thickness
