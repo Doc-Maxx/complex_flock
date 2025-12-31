@@ -29,8 +29,13 @@ class circle(region):
         b = 2*slope*(-shifted_point.real*slope + shifted_point.imag)
         a = slope**2 + 1
         x_int = (-2*b + np.sqrt(b**2 - 4*a*c))/(2*a)
+        y_int = slope*x_int + shifted_point.imag - slope*shifted_point.real
+        intersection_point = x_int + y_int*1j
+        return intersection_point
+
+
 class rectangle(region):
-    def __init__(self, point_2, thickness):
+      def __init__(self, point_2, thickness):
         self.thickness = thickness
         self.points = [origin, point_2]
 
