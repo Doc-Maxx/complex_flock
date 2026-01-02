@@ -6,14 +6,17 @@ class space:
         self.manifest = manifest
 
 class region:
-    def __init__(self, type=='empty', origin==0+0j, eps == 0.0001)
-        self.type = type
+    def __init__(self, origin=0+0j, eps = 0.0001):
+        self.type = ""
         self.origin = origin
+        self.eps = eps
 
 class circle(region):
-    def __init__(self, radius):
+    def __init__(self, origin,radius, eps = 0.0001):
+        self.origin = origin
         self.radius = radius 
         self.type = "circle"
+        self.eps = eps
 
     def point_Within(self, point):
         return (point.real - origin.real)**2 + (point.imag - origin.imag)**2 < self.radius**2
@@ -34,12 +37,14 @@ class circle(region):
         return intersection_point
   
 class rectangle(region):
-    def __init__(self, point_2, thickness):
+    def __init__(self, origin, point_2, thickness, eps = 0.0001):   
+        self.eps = eps
+        self.origin = origin
         self.thickness = thickness
         self.diff = point_2 - origin
         self.angle = np.angle(self.diff)
         self.extrusion = self.thickness * (self.diff / abs(self.diff)) * 1j
-        self.points = [origin, point_2, origin + self.extrusion, point_2 + self.extrusion]
+        self.points = np.array([origin, point_2, origin + self.extrusion, point_2 + self.extrusion])
         self.slope = self.diff.imag / (self.diff.real + self.eps)
         self.rotated_points = self.points * np.e**(-1j * self.angle) 
 
@@ -47,10 +52,12 @@ class rectangle(region):
         return points * np.e**(-1j * self.angle)
 
     def point_Within(self, point):
-        point_check = rotate_points(point)
-        hori_check = self.rotated.points[0].real < point_check.real < self.rotated_points[1].real
-        vert_check = self.rotated_points[0].imag < point_check.imag < self.rotated_points[1].imag
+        point_check = self.rotate_points(point)
+        hori_check = self.rotated_points[0].real < point_check.real < self.rotated_points[1].real
+        vert_check = self.rotated_points[0].imag < point_check.imag < self.rotated_points[2].imag
         return hori_check and vert_check
+
+
 
     def vec_within(self, pos_vec):
         rotate_vec = rotate_points(pos_vec)
