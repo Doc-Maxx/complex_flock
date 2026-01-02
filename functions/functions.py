@@ -20,10 +20,11 @@ class circle(region):
 
     def point_Within(self, point):
         return (point.real - origin.real)**2 + (point.imag - origin.imag)**2 < self.radius**2
-
+    
     def vec_within(self, pos_vec):
-        shifted_vec = pos_vec - origin
-        return np.where(shift_vec<self.radius**2, True, False)
+        shifted_vec = pos_vec - self.origin
+        print(shifted_vec)
+        return np.where(np.absolute(shifted_vec)<self.radius**2, True, False)
 
     def intersection(self, point, velocity):
         shifted_point = point - self.origin
