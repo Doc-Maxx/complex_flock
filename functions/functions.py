@@ -62,7 +62,7 @@ class rectangle(region):
 
     def vec_within(self, pos_vec):
         rotate_vec = rotate_points(pos_vec)
-        return np.where(    
+        returnv np.where(    
                         self.rotated_points[0].real < rotate_vec.real < self.rotated_points[1].real
                         and self.rotated_points[0].imag < rotate_vec.imag < self.rotated_points[1].imag,
                         True, False
@@ -74,8 +74,11 @@ class manifest:
         self.vel_master = np.array([])
 
     def spawn_flockers(self, N, region, alignment='random'):
-        positions=np.random.rand(N,2).view(np.complex64)+region.origin
-        velocities=np.random.rand(N,2).view(np.complex64)
+        positions=np.random.rand(N,2).view(np.complex128).flatten()+region.origin
+        velocities=np.random.rand(N,2).view(np.complex128).flatten()
         self.pos_master=np.append(self.pos_master, positions)
         self.vel_master=np.append(self.vel_master, velocities)
 
+    def split_flockers(self, regions):
+        for i in regions:
+            i.vec_within(self.pos_master)
