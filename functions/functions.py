@@ -70,5 +70,12 @@ class rectangle(region):
         
 class manifest:
     def __init__(self):
-        self.pos = np.array([])
-        self.vel = np.array([])
+        self.pos_master = np.array([])
+        self.vel_master = np.array([])
+
+    def spawn_flockers(self, N, region, alignment='random'):
+        positions=np.random.rand(N,2).view(np.complex64)+region.origin
+        velocities=np.random.rand(N,2).view(np.complex64)
+        self.pos_master=np.append(self.pos_master, positions)
+        self.vel_master=np.append(self.vel_master, velocities)
+
