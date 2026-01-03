@@ -6,5 +6,8 @@ import numpy as np
 point = np.array([1+1j, 1-1j, 1+1.5j])
 circle = fn.circle(origin= 1+1j,radius =1)
 
-print(circle.vec_within(point))
-
+#print(circle.vec_within(point)) 
+if circle.vec_within(point):
+    print("Circle Test: Success")
+else:
+    print("Circle Test: Failure")

@@ -68,4 +68,7 @@ class rectangle(region):
                         True, False
                         )
         
-
+class manifest:
+    def __init__(self):
+        self.pos = np.array([])
+        self.vel = np.array([])
