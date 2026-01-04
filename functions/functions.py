@@ -62,7 +62,7 @@ class rectangle(region):
 
     def vec_within(self, pos_vec):
         rotate_vec = rotate_points(pos_vec)
-        returnv np.where(    
+        return np.where(    
                         self.rotated_points[0].real < rotate_vec.real < self.rotated_points[1].real
                         and self.rotated_points[0].imag < rotate_vec.imag < self.rotated_points[1].imag,
                         True, False
