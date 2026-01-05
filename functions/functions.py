@@ -10,6 +10,8 @@ class region:
         self.type = ""
         self.origin = origin
         self.eps = eps
+        self.list_pos = np.array([])
+        self.list_vel = np.array([])
 
 class circle(region):
     def __init__(self, origin,radius, eps = 0.0001):
@@ -81,4 +83,7 @@ class manifest:
 
     def split_flockers(self, regions):
         for i in regions:
-            i.vec_within(self.pos_master)
+            condition_split = i.vec_within(self.pos_master)
+            i.list_pos = np.extract(condition_split, self.pos_master)
+            i.list_vel = np.extract(condition_split, self.vel_master)
+
