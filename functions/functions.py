@@ -14,19 +14,27 @@ class region:
         self.list_vel = np.array([])
 
 class circle(region):
-    def __init__(self, origin,radius, eps = 0.0001):
+    def __init__(self, origin,radius,arc=np.array([-np.pi, np.pi]), eps = 0.0001):
         self.origin = origin
         self.radius = radius 
         self.type = "circle"
         self.eps = eps
+        self.arc = arc
 
     def point_Within(self, point):
-        return (point.real - origin.real)**2 + (point.imag - origin.imag)**2 < self.radius**2
+        angle = np.angle(point)
+        return (point.real - origin.real)**2 + (point.imag - origin.imag)**2 < self.radius**2 and self.arc[0]<angle<self.arc[1]
     
     def vec_within(self, pos_vec):
         shifted_vec = pos_vec - self.origin
-        print(shifted_vec)
-        return np.where(np.absolute(shifted_vec)<self.radius**2, True, False)
+        angle = np.angle(shifted_vec)
+        c1 = np.absolute(shifted_vec)<self.radius
+        c2 = angle < self.arc[1]
+        c3 = self.arc[0] <= angle
+        condition = np.all([c1,c2,c3],axis=0)
+        return np.where(condition,True, False)
+
+
 
     def intersection(self, point, velocity):
         shifted_point = point - self.origin
