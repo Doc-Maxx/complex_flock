@@ -60,8 +60,6 @@ class rectangle(region):
         vert_check = self.rotated_points[0].imag < point_check.imag < self.rotated_points[2].imag
         return hori_check and vert_check
 
-
-
     def vec_within(self, pos_vec):
         rotate_vec = rotate_points(pos_vec)
         return np.where(    
@@ -86,4 +84,9 @@ class manifest:
             condition_split = i.vec_within(self.pos_master)
             i.list_pos = np.extract(condition_split, self.pos_master)
             i.list_vel = np.extract(condition_split, self.vel_master)
+
+    def enforce_boundary(self, regions):
+        for i in regions:
+            conidtion = i.vec_within(self.i.list_pos)
+
 
