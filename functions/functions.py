@@ -34,11 +34,9 @@ class circle(region):
         condition = np.all([c1,c2,c3],axis=0)
         return np.where(condition,True, False)
 
-
-
-    def intersection(self, point, velocity):
-        shifted_point = point - self.origin
-        slope = - velocity.imag / (velocity.real + self.eps)
+    def intersection(self):
+        shifted_point = self.list_pos - self.origin
+        slope = - self.list_vel.imag / (self.list_vel.real + self.eps)
         c = shifted_point.real**2 + shifted_point.imag**2 - self.radius**2 - 2*shifted_point.real*shifted_point.imag*slope
         b = 2*slope*(-shifted_point.real*slope + shifted_point.imag)
         a = slope**2 + 1
@@ -46,6 +44,12 @@ class circle(region):
         y_int = slope*x_int + shifted_point.imag - slope*shifted_point.real
         intersection_point = x_int + y_int*1j
         return intersection_point
+
+    def push(self):
+        diff = self.list_pos-self.intersection_point
+        self.list_pos = self.intersection_point-diff*1j
+        reflected_angle = np.angle(self.intersection_point)-np.angle(self.list_vel)+np.pi
+        self.list_vel = self.list_vel * np.e**(-1j * reflected_angle)
   
 class rectangle(region):
     def __init__(self, origin, point_2, thickness, eps = 0.0001):   
