@@ -63,8 +63,8 @@ class rectangle(region):
         self.slope = self.diff.imag / (self.diff.real + self.eps)
         self.rotated_points = self.points * np.e**(-1j * self.angle) 
 
-    def rotate_points(self, points):
-        return points * np.e**(-1j * self.angle)
+    def rotate_points(self, points, u = 1):
+        return points * np.e**(-1j * self.angle * u)
 
     def point_Within(self, point):
         point_check = self.rotate_points(point)
@@ -79,6 +79,20 @@ class rectangle(region):
                         and self.rotated_points[0].imag < rotate_vec.imag < self.rotated_points[1].imag,
                         True, False
                         )
+
+    def push(self):
+        shifted_point = self.list_pos - self.origin
+        shifted_point = self.rotate_points(shifted_point)
+        shifted_point = np.conjugate(shifted_point)
+        shifted_point = self.rotate_points(shifted_point, u = -1)
+        self.list_pos = shifted_point + self.origin
+
+        rotated_vel = self.rotate_points(self.list_vel)
+        rotated_vel = np.conjugate(rotated_vel)
+        self.list_vel = self.rotate_points(rotated_vel, u=-1)
+
+
+
         
 class manifest:
     def __init__(self):
