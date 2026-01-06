@@ -1,39 +1,45 @@
 import numpy as np
 
 class space:
-    def __init__(self, regions, manifest, dt):
-        self.regions = regions
-        self.manifest = manifest
-        self.dt = dt
+    def __init__(self, regions, manifest,):
+        self.regions = regions # list of regions, contains geometric information inparticular boundaries
+        self.manifest = manifest # list of flockers
+        self.dt = dt # step size
 
 class region:
     def __init__(self, origin=0+0j, eps = 0.0001):
-        self.type = ""
-        self.origin = origin
-        self.eps = eps
-        self.list_pos = np.array([])
-        self.list_vel = np.array([])
+        self.type = "" # regions are (semi)circles and rectangles, they automatically assign their type themselves
+        self.origin = origin # origin point, each region shape is built around this point
+        self.eps = eps # small value to avoid infinite slops in special intersection cases
+        self.list_pos = np.array([]) # Each region can have a list of flockers assigned to it via the manifest
+        self.list_vel = np.array([]) # same but contains their velocity information
 
 class circle(region):
     def __init__(self, origin,radius,arc=np.array([-np.pi, np.pi]), eps = 0.0001):
-        self.origin = origin
+        self.origin = origin # center of the circle or semicircle
         self.radius = radius 
-        self.type = "circle"
+        self.type = "circle" 
         self.eps = eps
-        self.arc = arc
+        self.arc = arc #defines angle for the semicircle default is a whole circle. The first value is the clockwise swing from the horizontal and the second is the counter clockwise
 
-    def point_Within(self, point):
+    def point_Within(self, point): # Checks if a single point is within the the (semi)circle
+        # It first shifts the point relative to the origin of the circle
+        # then checks the argument and mangnitude of the complex number fall within the radius and semicircle arc
+        # Returns a boolean
         angle = np.angle(point)
-        return (point.real - origin.real)**2 + (point.imag - origin.imag)**2 < self.radius**2 and self.arc[0]<angle<self.arc[1]
+        return (point.real - origin.real)**2 + (point.imag - origin.imag)**2 < self.radius**2 and self.arc[0]<=angle<self.arc[1]
     
-    def vec_within(self, pos_vec):
+    def vec_within(self, pos_vec): # checks if a vector of positions fall within the region
+        # returns a vector of booleans 
+        # shift all the positions to be around the origin
         shifted_vec = pos_vec - self.origin
-        angle = np.angle(shifted_vec)
-        c1 = np.absolute(shifted_vec)<self.radius
-        c2 = angle < self.arc[1]
-        c3 = self.arc[0] <= angle
-        condition = np.all([c1,c2,c3],axis=0)
-        return np.where(condition,True, False)
+        angle = np.angle(shifted_vec) # compute angles for all the shifted vectors. This has to be done after the origin shift.
+        # next we build alist of conditions to play nicely with booleans and vectors and conditions
+        c1 = np.absolute(shifted_vec)<self.radius # first we check that we are within the raidus
+        c2 = angle < self.arc[1] # second we check we are below the counter-clockwise sweeping angle
+        c3 = self.arc[0] <= angle # third we check we are above or ar the clockwise sweeping angle
+        condition = np.all([c1,c2,c3],axis=0) # Using np.all we create a combined condition, logically identical to "and" statements
+        return np.where(condition,True, False) 
 
     def intersection(self):
         shifted_point = self.list_pos - self.origin
