@@ -1,9 +1,10 @@
 import numpy as np
 
 class space:
-    def __init__(self, regions, manifest):
+    def __init__(self, regions, manifest, dt):
         self.regions = regions
         self.manifest = manifest
+        self.dt = dt
 
 class region:
     def __init__(self, origin=0+0j, eps = 0.0001):
@@ -98,6 +99,9 @@ class manifest:
     def __init__(self):
         self.pos_master = np.array([])
         self.vel_master = np.array([])
+
+    def step(self, space):
+        self.pos_master = self.pos_master + self.vel_master*space.dt
 
     def spawn_flockers(self, N, region, alignment='random'):
         positions=np.random.rand(N,2).view(np.complex128).flatten()+region.origin
