@@ -49,9 +49,13 @@ class ring(region):
         return intersection_point # return the intersection point as a complex value
 
     def rotate_points(self, angle, points, u = 1): # rotates points such that they lie entirely on the imaginary axis
-        return points * np.e**(-1j * (angle - np.pi) * u ) 
+        return points * np.e**(-1j * (angle - np.pi) * u ) # this method works differently than the other rotare points
 
-    def push(self):
+    def push(self): # pushes boids out into the interior side of the ring
+        # returns nothing 
+        # We rotate the points counter clockwise so that their corresponding intersection points lie on the imaginary axis
+        # We then reflect the velocity and positions across the horizontal line intersecting that intersection point
+        # This reflection is done by taking the complex conjugate
         intersection_angles = np.angle(self.intersection_point)
         shifted_point = self.list_pos - self.origin
         shifted_point = self.rotate_points(intersection_angles, shifted_point)
