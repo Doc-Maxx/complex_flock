@@ -107,25 +107,27 @@ class rectangle(region):
         rotated_vel = self.rotate_points(self.list_vel) # rotate the velocities as well they do no need to shifted
         rotated_vel = np.conjugate(rotated_vel) # reflect the verticle velocity component
         self.list_vel = self.rotate_points(rotated_vel, u=-1) # undo the rotation and set the new velocities
-
-
-
         
 class manifest:
     def __init__(self):
-        self.pos_master = np.array([])
-        self.vel_master = np.array([])
+        self.pos_master = np.array([]) # master list of positions 
+        self.vel_master = np.array([]) # master list of velocities
 
-    def step(self, space):
+    def step(self, space): # steps the manifest forward one time step
         self.pos_master = self.pos_master + self.vel_master*space.dt
 
-    def spawn_flockers(self, N, region, alignment='random'):
+    def add_flocker(self, pos, vel): # adds a flocker to the list
+        self.pos_master=np.append(self.pos, pos)
+        self.vel_master=np.append(self.vel, vel)
+
+    def spawn_flockers(self, N, region, alignment='random'): # generates a list of flockers 
+        # this is done within around the origin of a region
         positions=np.random.rand(N,2).view(np.complex128).flatten()+region.origin
         velocities=np.random.rand(N,2).view(np.complex128).flatten()
         self.pos_master=np.append(self.pos_master, positions)
         self.vel_master=np.append(self.vel_master, velocities)
 
-    def split_flockers(self, regions):
+    def split_flockers(self, regions): # This splits the manifest by filling each region with flockers within each region
         for i in regions:
             condition_split = i.vec_within(self.pos_master)
             i.list_pos = np.extract(condition_split, self.pos_master)
@@ -135,4 +137,4 @@ class manifest:
         for i in regions:
             conidtion = i.vec_within(self.i.list_pos)
 
-
+  
