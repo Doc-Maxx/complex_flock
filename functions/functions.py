@@ -15,6 +15,53 @@ class region:
         self.list_vel = np.array([]) # same but contains their velocity information
         self.boundary = boundary_bool # boolean to indicate a regions status as a boundary
 
+class ring(region):
+    def __init__(self, origin, radius_inner, radius_outer, arc=np.array([-np.pi,np.pi]),boundary_bool=False)
+        region.__init__(self, origin=origin, eps=0.0001,boundary_bool=boundary_bool)
+        self.type="ring"
+        self.radius_inner=radius_inner
+        self.radius_outer=radius_outer
+
+    def vec_within(self, pos_vec): # checks if a vector of points fall withihn a ring
+        # returns a vector of booleans
+        shifted_vec = pos_vec - self.origin # shift to the origin
+        mags = np.absolute(shifted_vec) # precompute magnitudes
+        ang = np.angle(shifted_vec) # precompute arguments
+        c1 = mags <= self.radius_outer 
+        c2 = self.radius_inner <= mags
+        c3 = ang < self.arc[1]  
+        c4 = self.arc[0] <= ang 
+        condition = np.all([c1,c2,c3,c4],axis=0)
+        return np.where(condition, True, False)
+
+    def intersection(self):
+        shifted_point = self.list_pos - self.origin # shift the point(s) to work around the origin
+        slope = - self.list_vel.imag / (self.list_vel.real + self.eps) # compute the slope of the line defining the trajectory from the last point
+        # The algebra results in a quadratic equation - what follows is a calculation for a b and c
+        # To do this self solve the system of equations for defining a circle and a line
+        c = shifted_point.real**2 + shifted_point.imag**2 - self.radius_inner**2 - 2*shifted_point.real*shifted_point.imag*slope
+        b = 2*slope*(-shifted_point.real*slope + shifted_point.imag)
+        a = slope**2 + 1
+        # We take the positive solution
+        x_int = (-2*b + np.sqrt(b**2 - 4*a*c))/(2*a)
+        y_int = slope*x_int + shifted_point.imag - slope*shifted_point.real
+        intersection_point = x_int + y_int*1j
+        return intersection_point # return the intersection point as a complex value
+
+    def rotate_points(self, angle, points, u = 1): # rotates points such that they lie entirely on the imaginary axis
+        return points * np.e**(-1j * (angle - np.pi) * u ) 
+
+    def push(self):
+        intersection_angles = np.angle(self.intersection_point)
+        shifted_point = self.list_pos - self.origin
+        shifted_point = self.rotate_points(intersection_angles, shifted_point)
+        shifted_point = np.conjugate(shifted_point)
+        list.list_pos = self.rotate_points(intersection_angles, shifted_point, u=-1) + self.origin
+
+        shifted_vel = self.rotate_points(intersection_angles, self.list_vel)
+        shifted_vel = np.conjugate(shifted_vel)
+        list.list_pos = self.rotate_points(intersection_angles, shifted_vel, u=-1)
+
 class circle(region):
     def __init__(self, origin,radius,arc=np.array([-np.pi, np.pi]), eps = 0.0001, boundary_bool=False):
         self.origin = origin # center of the circle or semicircle
