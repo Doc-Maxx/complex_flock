@@ -1,7 +1,7 @@
 import numpy as np
 
 class space:
-    def __init__(self, regions, manifest,):
+    def __init__(self, regions, manifest):
         self.regions = regions # list of regions, contains geometric information inparticular boundaries
         self.manifest = manifest # list of flockers
         self.dt = dt # step size
@@ -89,12 +89,15 @@ class rectangle(region):
     def vec_within(self, pos_vec): # checks if a vector of points fall within a rectangle region
         # First we rotate the points and then check to see if they fall within the rotated rectangle
         # returns a vector of booleans
-        rotate_vec = rotate_points(pos_vec)
-        return np.where(    
-                        self.rotated_points[0].real < rotate_vec.real < self.rotated_points[1].real
-                        and self.rotated_points[0].imag < rotate_vec.imag < self.rotated_points[1].imag,
-                        True, False
-                        )
+        rotate_vec = self.rotate_points(pos_vec)
+        
+        c1 = self.rotated_points[0].real <= rotate_vec.real 
+        c2 = rotate_vec.real <= self.rotated_points[1].real 
+        c3 = self.rotated_points[0].imag <= rotate_vec.imag
+        c4 = rotate_vec.imag <= self.rotated_points[2].imag
+
+        condition = np.all([c1,c2,c3,c4],axis=0)
+        return np.where( condition, True, False )
 
     def push(self): # pushes flockers out of the rectangle as if the line between the origin and point_2 were a reflecting wall
         # returns nothing
@@ -117,8 +120,8 @@ class manifest:
         self.pos_master = self.pos_master + self.vel_master*space.dt
 
     def add_flocker(self, pos, vel): # adds a flocker to the list
-        self.pos_master=np.append(self.pos, pos)
-        self.vel_master=np.append(self.vel, vel)
+        self.pos_master=np.append(self.pos_master, pos)
+        self.vel_master=np.append(self.vel_master, vel)
 
     def spawn_flockers(self, N, region, alignment='random'): # generates a list of flockers 
         # this is done within around the origin of a region
