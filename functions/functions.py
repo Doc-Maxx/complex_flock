@@ -7,21 +7,23 @@ class space:
         self.dt = dt # step size
 
 class region:
-    def __init__(self, origin=0+0j, eps = 0.0001):
+    def __init__(self, origin=0+0j, eps = 0.0001, boundary_bool=False):
         self.type = "" # regions are (semi)circles and rectangles, they automatically assign their type themselves
         self.origin = origin # origin point, each region shape is built around this point
         self.eps = eps # small value to avoid infinite slops in special intersection cases
         self.list_pos = np.array([]) # Each region can have a list of flockers assigned to it via the manifest
         self.list_vel = np.array([]) # same but contains their velocity information
+        self.boundary = boundary_bool # boolean to indicate a regions status as a boundary
 
 class circle(region):
-    def __init__(self, origin,radius,arc=np.array([-np.pi, np.pi]), eps = 0.0001):
+    def __init__(self, origin,radius,arc=np.array([-np.pi, np.pi]), eps = 0.0001, boundary_bool=False):
         self.origin = origin # center of the circle or semicircle
         self.radius = radius 
         self.type = "circle" 
         self.eps = eps
         self.arc = arc #defines angle for the semicircle default is a whole circle. The first value is the clockwise swing from the horizontal and the second is the counter clockwise
-
+        self.boundary = boundary_bool
+        
     def point_Within(self, point): # Checks if a single point is within the the (semi)circle
         # It first shifts the point relative to the origin of the circle
         # then checks the argument and mangnitude of the complex number fall within the radius and semicircle arc
@@ -64,7 +66,7 @@ class circle(region):
         self.list_vel = self.list_vel * np.e**(-1j * reflected_angle)
   
 class rectangle(region):
-    def __init__(self, origin, point_2, thickness, eps = 0.0001):   
+    def __init__(self, origin, point_2, thickness, eps = 0.0001,boundary_bool=False):   
         self.eps = eps # used to compute the slope to avoid infinities
         self.origin = origin # sort of the lower left corner of a rectangle. The rectangle is created by drawing from here to Point_2 
         self.thickness = thickness # distance we extrude the rectangle into the i-direction.
@@ -74,6 +76,7 @@ class rectangle(region):
         self.points = np.array([origin, point_2, origin + self.extrusion, point_2 + self.extrusion]) # all four points
         self.slope = self.diff.imag / (self.diff.real + self.eps) # slope of the line defined by the origin and point_2
         self.rotated_points = self.points * np.e**(-1j * self.angle) # all four points rotated such that the origin and point_2 have zero slope
+        self.boundary = boundary_bool
 
     def rotate_points(self, points, u = 1): # rotates points as much as the rectangle needs to be rotated for self.rotate_points
         return points * np.e**(-1j * self.angle * u)
@@ -120,6 +123,7 @@ class manifest:
         self.pos_master = self.pos_master + self.vel_master*space.dt
 
     def add_flocker(self, pos, vel): # adds a flocker to the list
+        # returns nothing
         self.pos_master=np.append(self.pos_master, pos)
         self.vel_master=np.append(self.vel_master, vel)
 
@@ -131,13 +135,17 @@ class manifest:
         self.vel_master=np.append(self.vel_master, velocities)
 
     def split_flockers(self, regions): # This splits the manifest by filling each region with flockers within each region
-        for i in regions:
-            condition_split = i.vec_within(self.pos_master)
+        # returns nothing
+        # This method allows overlapping regions to have duplicate flockers
+        for i in regions: # loop through region list 
+            condition_split = i.vec_within(self.pos_master) # create boolean conditions for splitting up the master list into regional lists
             i.list_pos = np.extract(condition_split, self.pos_master)
             i.list_vel = np.extract(condition_split, self.vel_master)
 
-    def enforce_boundary(self, regions):
+    def enforce_boundary(self, regions): # this loops through the regions and pushes out flockers that are within boundary regions
         for i in regions:
-            conidtion = i.vec_within(self.i.list_pos)
+            if i.boundary_bool == True:
+                condition = i.vec_within(self.i.list_pos)
+                i.push()
 
   
