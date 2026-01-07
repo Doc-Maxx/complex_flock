@@ -78,13 +78,17 @@ class rectangle(region):
     def rotate_points(self, points, u = 1): # rotates points as much as the rectangle needs to be rotated for self.rotate_points
         return points * np.e**(-1j * self.angle * u)
 
-    def point_Within(self, point):
+    def point_Within(self, point): # checks if a point lies within the rectanglular region
+        # We first rotate the point and the check to see if it falls within the rotated rectangle
+        # returns a boolean
         point_check = self.rotate_points(point)
         hori_check = self.rotated_points[0].real < point_check.real < self.rotated_points[1].real
         vert_check = self.rotated_points[0].imag < point_check.imag < self.rotated_points[2].imag
         return hori_check and vert_check
 
-    def vec_within(self, pos_vec):
+    def vec_within(self, pos_vec): # checks if a vector of points fall within a rectangle region
+        # First we rotate the points and then check to see if they fall within the rotated rectangle
+        # returns a vector of booleans
         rotate_vec = rotate_points(pos_vec)
         return np.where(    
                         self.rotated_points[0].real < rotate_vec.real < self.rotated_points[1].real
@@ -92,16 +96,17 @@ class rectangle(region):
                         True, False
                         )
 
-    def push(self):
-        shifted_point = self.list_pos - self.origin
-        shifted_point = self.rotate_points(shifted_point)
-        shifted_point = np.conjugate(shifted_point)
-        shifted_point = self.rotate_points(shifted_point, u = -1)
-        self.list_pos = shifted_point + self.origin
+    def push(self): # pushes flockers out of the rectangle as if the line between the origin and point_2 were a reflecting wall
+        # returns nothing
+        shifted_point = self.list_pos - self.origin # shift the to the origin
+        shifted_point = self.rotate_points(shifted_point) # rotate the points to align with the rotated rectangle 
+        shifted_point = np.conjugate(shifted_point) # conjugate the number to reflect the position across the diff line
+        shifted_point = self.rotate_points(shifted_point, u = -1) # rotate the points back
+        self.list_pos = shifted_point + self.origin # undo the origin shift to find the new true positions
 
-        rotated_vel = self.rotate_points(self.list_vel)
-        rotated_vel = np.conjugate(rotated_vel)
-        self.list_vel = self.rotate_points(rotated_vel, u=-1)
+        rotated_vel = self.rotate_points(self.list_vel) # rotate the velocities as well they do no need to shifted
+        rotated_vel = np.conjugate(rotated_vel) # reflect the verticle velocity component
+        self.list_vel = self.rotate_points(rotated_vel, u=-1) # undo the rotation and set the new velocities
 
 
 
