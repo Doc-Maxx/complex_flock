@@ -55,25 +55,27 @@ class circle(region):
         intersection_point = x_int + y_int*1j
         return intersection_point # return the intersection point as a complex value
 
-    def push(self):
-        diff = self.list_pos-self.intersection_point
-        self.list_pos = self.intersection_point-diff*1j
+    def push(self): # using the intersection_point method, this computes the new position and velocity for the region list
+        # that is it enforces the boundary by pushing flockers out of the (semi)circle
+        # returns nothing
+        diff = self.list_pos-self.intersection_point # find the number between the intersection point and the point within
+        self.list_pos = self.intersection_point-diff*1j # move perpendicularly that distance from UHHH NEED TO CHECK THIS MATH
         reflected_angle = np.angle(self.intersection_point)-np.angle(self.list_vel)+np.pi
         self.list_vel = self.list_vel * np.e**(-1j * reflected_angle)
   
 class rectangle(region):
     def __init__(self, origin, point_2, thickness, eps = 0.0001):   
-        self.eps = eps
-        self.origin = origin
-        self.thickness = thickness
-        self.diff = point_2 - origin
-        self.angle = np.angle(self.diff)
-        self.extrusion = self.thickness * (self.diff / abs(self.diff)) * 1j
-        self.points = np.array([origin, point_2, origin + self.extrusion, point_2 + self.extrusion])
-        self.slope = self.diff.imag / (self.diff.real + self.eps)
-        self.rotated_points = self.points * np.e**(-1j * self.angle) 
+        self.eps = eps # used to compute the slope to avoid infinities
+        self.origin = origin # sort of the lower left corner of a rectangle. The rectangle is created by drawing from here to Point_2 
+        self.thickness = thickness # distance we extrude the rectangle into the i-direction.
+        self.diff = point_2 - origin # shifts point 2 to the origin
+        self.angle = np.angle(self.diff) 
+        self.extrusion = self.thickness * (self.diff / abs(self.diff)) * 1j # creates a number rotated by i to extrude the rectangle by
+        self.points = np.array([origin, point_2, origin + self.extrusion, point_2 + self.extrusion]) # all four points
+        self.slope = self.diff.imag / (self.diff.real + self.eps) # slope of the line defined by the origin and point_2
+        self.rotated_points = self.points * np.e**(-1j * self.angle) # all four points rotated such that the origin and point_2 have zero slope
 
-    def rotate_points(self, points, u = 1):
+    def rotate_points(self, points, u = 1): # rotates points as much as the rectangle needs to be rotated for self.rotate_points
         return points * np.e**(-1j * self.angle * u)
 
     def point_Within(self, point):
