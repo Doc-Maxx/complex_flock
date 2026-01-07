@@ -41,16 +41,19 @@ class circle(region):
         condition = np.all([c1,c2,c3],axis=0) # Using np.all we create a combined condition, logically identical to "and" statements
         return np.where(condition,True, False) 
 
-    def intersection(self):
-        shifted_point = self.list_pos - self.origin
-        slope = - self.list_vel.imag / (self.list_vel.real + self.eps)
+    def intersection(self): # if a position(s) is within the circle we can compute where it intersected the boundary given a velocity
+        shifted_point = self.list_pos - self.origin # shift the point(s) to work around the origin
+        slope = - self.list_vel.imag / (self.list_vel.real + self.eps) # compute the slope of the line defining the trajectory from the last point
+        # The algebra results in a quadratic equation - what follows is a calculation for a b and c
+        # To do this self solve the system of equations for defining a circle and a line
         c = shifted_point.real**2 + shifted_point.imag**2 - self.radius**2 - 2*shifted_point.real*shifted_point.imag*slope
         b = 2*slope*(-shifted_point.real*slope + shifted_point.imag)
         a = slope**2 + 1
+        # We take the positive solution
         x_int = (-2*b + np.sqrt(b**2 - 4*a*c))/(2*a)
         y_int = slope*x_int + shifted_point.imag - slope*shifted_point.real
         intersection_point = x_int + y_int*1j
-        return intersection_point
+        return intersection_point # return the intersection point as a complex value
 
     def push(self):
         diff = self.list_pos-self.intersection_point
