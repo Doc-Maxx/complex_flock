@@ -16,11 +16,12 @@ class region:
         self.boundary = boundary_bool # boolean to indicate a regions status as a boundary
 
 class ring(region):
-    def __init__(self, origin, radius_inner, radius_outer, arc=np.array([-np.pi,np.pi]),boundary_bool=False)
+    def __init__(self, origin, radius_inner, radius_outer, arc=np.array([-np.pi,np.pi]),boundary_bool=False):
         region.__init__(self, origin=origin, eps=0.0001,boundary_bool=boundary_bool)
         self.type="ring"
         self.radius_inner=radius_inner
         self.radius_outer=radius_outer
+        self.arc = arc
 
     def vec_within(self, pos_vec): # checks if a vector of points fall withihn a ring
         # returns a vector of booleans
@@ -199,4 +200,20 @@ class manifest:
                 condition = i.vec_within(self.i.list_pos)
                 i.push()
 
-  
+    def connect_adjacent_regions(self, regions): # creats a shared list between adjacent regions
+        # returns list of velocities and positions of all flockers contained in adjacent and the region of interest
+        # this function assumes regions in the regions list are adjacent, so whe using it use care to arrange regions that way
+        n_pos_list= np.array([])
+        n_vel_list= np.array([])
+        # we want to exclude the boundary regions
+        container_regions = []
+        for i in regions:
+            if i.boundary_bool == False:
+                container_regions.append(regions[i])
+                    
+        for i in container_regions:
+            n_pos_list = 
+
+
+    
+        
