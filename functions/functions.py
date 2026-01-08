@@ -211,8 +211,14 @@ class manifest:
             if i.boundary_bool == False:
                 container_regions.append(regions[i])
                     
-        for i in container_regions:
-            n_pos_list = 
+        for i in range(len(container_regions)):
+            n_pos_list = np.append(n_pos_list, container_regions[i].list_pos)
+            n_pos_list = np.append(n_pos_list, container_regions[i-1].list_pos)
+            n_pos_list = np.append(n_pos_list, container_regions[i%len(container_regions)].list_pos)
+            
+            n_vel_list = np.append(n_vel_list, container_regions[i].list_vel)
+            n_vel_list = np.append(n_vel_list, container_regions[i-1].list_vel)
+            n_vel_list = np.append(n_vel_list, container_regions[i%len(container_regions)].list_vel)
 
 
     
