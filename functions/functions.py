@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.spatial as spp
 
 class space:
     def __init__(self, regions, manifest):
@@ -175,10 +176,11 @@ class rectangle(region):
         self.list_vel = self.rotate_points(rotated_vel, u=-1) # undo the rotation and set the new velocities
         
 class manifest:
-    def __init__(self):
+    def __init__(self, radius):
         self.pos_master = np.array([]) # master list of positions 
         self.vel_master = np.array([]) # master list of velocities
         self.container_regions = self.create_container_regions()
+        self.radius = radius
 
 
     def step(self, space): # steps the manifest forward one time step
@@ -211,10 +213,9 @@ class manifest:
                 i.push()
 
     def update_velocity(self, space):
-    for i in space.container_regions:
-        pos, vel, slices = connect_adj_regions(space, i)
-
-
+        for i in space.container_regions:
+            pos, vel, slices = self.connect_adj_regions(space, i)
+            hood = self.get_hood(space, pos)
 
     def connect_adj_regions(self, space, index): # creats a shared list between adjacent regions
         # returns list of velocities and positions of all flockers contained in adjacent and the region of interest
@@ -234,4 +235,7 @@ class manifest:
 
         return n_pos_list, n_vel_list,  [len(region[i-1]),len(region[i])]
     
-        
+    def get_hood(self, pos_vec):
+        pos_vec = np.array([np.real(pos_vec), np.imag(pos_vec)])
+        tree = spp.cKDTree(pos_vec)
+        return tree.query_ball_point(pos_vec, self.raidus)
