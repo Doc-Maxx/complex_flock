@@ -3,8 +3,16 @@ import numpy as np
 class space:
     def __init__(self, regions, manifest):
         self.regions = regions # list of regions, contains geometric information inparticular boundaries
+        self.container_regions = self.create_container_regions(self.regions)
         self.manifest = manifest # list of flockers
         self.dt = dt # step size
+
+    def create_container_regions(self, regions):
+        container_regions = []
+        for i in regions:
+            if i.boundary_bool == False:
+                container_regions.append(regions[i])
+        return container_regions
 
 class region:
     def __init__(self, origin=0+0j, eps = 0.0001, boundary_bool=False):
@@ -13,8 +21,8 @@ class region:
         self.eps = eps # small value to avoid infinite slops in special intersection cases
         self.list_pos = np.array([]) # Each region can have a list of flockers assigned to it via the manifest
         self.list_vel = np.array([]) # same but contains their velocity information
-        self.boundary = boundary_bool # boolean to indicate a regions status as a boundary
-
+        self.boundary = boundary_bool # boolean to indicate a regions status as a boundary 
+        
 class ring(region):
     def __init__(self, origin, radius_inner, radius_outer, arc=np.array([-np.pi,np.pi]),boundary_bool=False):
         region.__init__(self, origin=origin, eps=0.0001,boundary_bool=boundary_bool)
@@ -170,6 +178,8 @@ class manifest:
     def __init__(self):
         self.pos_master = np.array([]) # master list of positions 
         self.vel_master = np.array([]) # master list of velocities
+        self.container_regions = self.create_container_regions()
+
 
     def step(self, space): # steps the manifest forward one time step
         self.pos_master = self.pos_master + self.vel_master*space.dt
@@ -200,26 +210,28 @@ class manifest:
                 condition = i.vec_within(self.i.list_pos)
                 i.push()
 
-    def connect_adjacent_regions(self, regions): # creats a shared list between adjacent regions
+    def update_velocity(self, space):
+    for i in space.container_regions:
+        pos, vel, slices = connect_adj_regions(space, i)
+
+
+
+    def connect_adj_regions(self, space, index): # creats a shared list between adjacent regions
         # returns list of velocities and positions of all flockers contained in adjacent and the region of interest
         # this function assumes regions in the regions list are adjacent, so whe using it use care to arrange regions that way
         n_pos_list= np.array([])
         n_vel_list= np.array([])
-        # we want to exclude the boundary regions
-        container_regions = []
-        for i in regions:
-            if i.boundary_bool == False:
-                container_regions.append(regions[i])
-                    
-        for i in range(len(container_regions)):
-            n_pos_list = np.append(n_pos_list, container_regions[i].list_pos)
-            n_pos_list = np.append(n_pos_list, container_regions[i-1].list_pos)
-            n_pos_list = np.append(n_pos_list, container_regions[i%len(container_regions)].list_pos)
+        i = index
+        region = space.container_regions
+                           
+        n_pos_list = np.append(n_pos_list, region[i].list_pos)
+        n_pos_list = np.append(n_pos_list, region[i-1].list_pos)
+        n_pos_list = np.append(n_pos_list, region[i%len(region)].list_pos)
             
-            n_vel_list = np.append(n_vel_list, container_regions[i].list_vel)
-            n_vel_list = np.append(n_vel_list, container_regions[i-1].list_vel)
-            n_vel_list = np.append(n_vel_list, container_regions[i%len(container_regions)].list_vel)
+        n_vel_list = np.append(n_vel_list, region[i].list_vel)
+        n_vel_list = np.append(n_vel_list, region[i-1].list_vel)
+        n_vel_list = np.append(n_vel_list, region[i%len(region)].list_vel)
 
-
+        return n_pos_list, n_vel_list,  [len(region[i-1]),len(region[i])]
     
         
