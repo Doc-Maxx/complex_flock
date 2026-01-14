@@ -2,7 +2,7 @@ import numpy as np
 import scipy.spatial as spp
 
 class space:
-    def __init__(self, regions, manifest):
+    def __init__(self, regions, manifest, dt):
         self.regions = regions # list of regions, contains geometric information inparticular boundaries
         self.container_regions = self.create_container_regions(self.regions)
         self.manifest = manifest # list of flockers
@@ -11,8 +11,8 @@ class space:
     def create_container_regions(self, regions):
         container_regions = []
         for i in regions:
-            if i.boundary_bool == False:
-                container_regions.append(regions[i])
+            if i.boundary == False:
+                container_regions.append(i)
         return container_regions
 
 class region:
@@ -84,7 +84,9 @@ class circle(region):
         self.eps = eps
         self.arc = arc #defines angle for the semicircle default is a whole circle. The first value is the clockwise swing from the horizontal and the second is the counter clockwise
         self.boundary = boundary_bool
-        
+        self.list_pos = np.array([]) # Each region can have a list of flockers assigned to it via the manifest
+        self.list_vel = np.array([]) # same but contains their velocity information
+
     def point_Within(self, point): # Checks if a single point is within the the (semi)circle
         # It first shifts the point relative to the origin of the circle
         # then checks the argument and mangnitude of the complex number fall within the radius and semicircle arc
@@ -138,6 +140,9 @@ class rectangle(region):
         self.slope = self.diff.imag / (self.diff.real + self.eps) # slope of the line defined by the origin and point_2
         self.rotated_points = self.points * np.e**(-1j * self.angle) # all four points rotated such that the origin and point_2 have zero slope
         self.boundary = boundary_bool
+        self.list_pos = np.array([]) # Each region can have a list of flockers assigned to it via the manifest
+        self.list_vel = np.array([]) # same but contains their velocity information
+
 
     def rotate_points(self, points, u = 1): # rotates points as much as the rectangle needs to be rotated for self.rotate_points
         return points * np.e**(-1j * self.angle * u)
@@ -179,7 +184,6 @@ class manifest:
     def __init__(self, radius):
         self.pos_master = np.array([]) # master list of positions 
         self.vel_master = np.array([]) # master list of velocities
-        self.container_regions = self.create_container_regions()
         self.radius = radius
 
 
@@ -213,9 +217,19 @@ class manifest:
                 i.push()
 
     def update_velocity(self, space):
-        for i in space.container_regions:
+        new_master_velocity = np.array([])
+        for i in range(len(space.container_regions)):
             pos, vel, slices = self.connect_adj_regions(space, i)
-            hood = self.get_hood(space, pos)
+            hood = self.get_hood(pos)
+            for i in slices:
+                print(np.average(vel[hood[i]]))
+                vel[i] = np.average(vel[hood[i]])
+        
+            new_master_velocity = np.append(new_master_velocity, vel[slices[0]:slices[1]])
+       
+        print(new_master_velocity)
+        return new_master_velocity
+            
 
     def connect_adj_regions(self, space, index): # creats a shared list between adjacent regions
         # returns list of velocities and positions of all flockers contained in adjacent and the region of interest
@@ -224,18 +238,18 @@ class manifest:
         n_vel_list= np.array([])
         i = index
         region = space.container_regions
-                           
+                                  
         n_pos_list = np.append(n_pos_list, region[i].list_pos)
         n_pos_list = np.append(n_pos_list, region[i-1].list_pos)
-        n_pos_list = np.append(n_pos_list, region[i%len(region)].list_pos)
-            
+        n_pos_list = np.append(n_pos_list, region[(i+1)%len(region)].list_pos)
+        
         n_vel_list = np.append(n_vel_list, region[i].list_vel)
         n_vel_list = np.append(n_vel_list, region[i-1].list_vel)
-        n_vel_list = np.append(n_vel_list, region[i%len(region)].list_vel)
+        n_vel_list = np.append(n_vel_list, region[(i+1)%len(region)].list_vel)
 
-        return n_pos_list, n_vel_list,  [len(region[i-1]),len(region[i])]
+        return n_pos_list, n_vel_list,  [len(region[i-1].list_pos),len(region[i].list_pos)]
     
     def get_hood(self, pos_vec):
         pos_vec = np.array([np.real(pos_vec), np.imag(pos_vec)])
         tree = spp.cKDTree(pos_vec)
-        return tree.query_ball_point(pos_vec, self.raidus)
+        return tree.query_ball_point(pos_vec, self.radius)
