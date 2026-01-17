@@ -204,10 +204,10 @@ class manifest:
         self.pos_master=np.append(self.pos_master, positions)
         self.vel_master=np.append(self.vel_master, velocities)
 
-    def split_flockers(self, regions): # This splits the manifest by filling each region with flockers within each region
+    def split_flockers(self, space): # This splits the manifest by filling each region with flockers within each region
         # returns nothing
         # This method allows overlapping regions to have duplicate flockers
-        for i in regions: # loop through region list 
+        for i in space.regions: # loop through region list 
             condition_split = i.vec_within(self.pos_master) # create boolean conditions for splitting up the master list into regional lists
             i.list_pos = np.extract(condition_split, self.pos_master)
             i.list_vel = np.extract(condition_split, self.vel_master)

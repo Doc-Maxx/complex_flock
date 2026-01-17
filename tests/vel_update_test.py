@@ -14,10 +14,10 @@ r2 = fn.rectangle(-.5+0j, 0.5+0j,1)
 r3 = fn.rectangle(.5+0j, 1.5+0j,1)
 regions = [r1,r2,r3]
 s = fn.space(regions,mani, 1)
-print(mani.vel_master)
-mani.split_flockers(s.regions)
-print(r1.list_vel)
+mani.split_flockers(s)
 mani.update_velocity(s)
-mani.split_flockers(s.regions)
-print(mani.vel_master)
-
+mani.reform_master_list(s)
+if np.average(mani.vel_master) == 0+0j:
+    print("Velocity Update Test: Success")
+else:
+    print("Velocity Update Test: Failure")
