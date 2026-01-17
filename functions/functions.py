@@ -220,13 +220,20 @@ class manifest:
         new_master_velocity = np.array([])
         for i in range(len(space.container_regions)):
             pos, vel, slices = self.connect_adj_regions(space, i)
-            hood = self.get_hood(pos)
-            for i in slices:
-                print(np.average(vel[hood[i]]))
-                vel[i] = np.average(vel[hood[i]])
-        
-            new_master_velocity = np.append(new_master_velocity, vel[slices[0]:slices[1]])
-       
+            print("slices "+str(slices))
+            tree = self.make_tree(pos)
+            pos = np.array([np.real(pos), np.imag(pos)])
+            for j in range(len(space.container_regions[i].list_pos)):
+                pos_local = space.container_regions[i].list_pos
+                pos_local = np.array([np.real(pos_local), np.imag(pos_local)])
+                print(pos_local)
+                hood = self.get_hood(pos_local[:,j],tree)
+                print(hood)
+                print("vel: "+ str(space.container_regions[i].list_vel))
+                print(np.average(vel[hood]))
+                space.container_regions[i].list_vel[j] = np.average(vel[hood])
+                print("updated" + str(space.container_regions[i].list_vel))
+                        
         print(new_master_velocity)
         return new_master_velocity
             
@@ -247,9 +254,12 @@ class manifest:
         n_vel_list = np.append(n_vel_list, region[i-1].list_vel)
         n_vel_list = np.append(n_vel_list, region[(i+1)%len(region)].list_vel)
 
-        return n_pos_list, n_vel_list,  [len(region[i-1].list_pos),len(region[i].list_pos)]
+        return n_pos_list, n_vel_list,  [len(region[i-1].list_pos),len(region[i-1].list_pos)+len(region[i].list_pos)]
     
-    def get_hood(self, pos_vec):
-        pos_vec = np.array([np.real(pos_vec), np.imag(pos_vec)])
-        tree = spp.cKDTree(pos_vec)
-        return tree.query_ball_point(pos_vec, self.radius)
+ 
+    def make_tree(self, pos_vec):
+        pos_vec = np.array([np.real(pos_vec), np.imag(pos_vec)]).T   
+        return spp.cKDTree(pos_vec)
+        
+    def get_hood(self, point, tree):     
+        return tree.query_ball_point(point, r=self.radius)
