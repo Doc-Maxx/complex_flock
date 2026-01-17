@@ -231,22 +231,13 @@ class manifest:
         space_copy = copy.deepcopy(space) # Make a deep copy of the space it will fix the ordering issue
         for i in range(len(space.container_regions)):
             pos, vel, slices = self.connect_adj_regions(space_copy, i)
-            print(space)
-            print(space_copy)
-            print("master: "+ str(space_copy.manifest.vel_master))
-            print(vel)
             tree = self.make_tree(pos) 
             for j in range(len(space.container_regions[i].list_pos)):
                 pos_local = space.container_regions[i].list_pos
                 pos_local = np.array([np.real(pos_local), np.imag(pos_local)])
-                print(pos_local)
                 hood = self.get_hood(pos_local[:,j],tree)
-                print(hood)
-                print("vel: "+ str(space.container_regions[i].list_vel))
-                print(vel[hood])
-                print(np.average(vel[hood]))
                 space.container_regions[i].list_vel[j] = np.average(vel[hood])
-                print("updated" + str(space.container_regions[i].list_vel))
+               
         self.reform_master_list(space)
 
     def connect_adj_regions(self, space, index): # creats a shared list between adjacent regions
@@ -254,10 +245,8 @@ class manifest:
         # this function assumes regions in the regions list are adjacent, so whe using it use care to arrange regions that way
         n_pos_list= np.array([])
         n_vel_list= np.array([])
-        s = space
-        print(s)
         i = index
-        region = s.container_regions
+        region = space.container_regions
                                           
         n_pos_list = np.append(n_pos_list, region[i].list_pos)
         n_pos_list = np.append(n_pos_list, region[i-1].list_pos)
