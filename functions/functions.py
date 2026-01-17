@@ -210,6 +210,15 @@ class manifest:
             i.list_pos = np.extract(condition_split, self.pos_master)
             i.list_vel = np.extract(condition_split, self.vel_master)
 
+    def reform_master_list(self, space):
+        v = np.array([])
+        p = np.array([])
+        for i in space.container_regions:
+            v = np.append(v, i.list_vel)
+            p = np.append(p, i.list_pos)
+        self.vel_master = v
+        self.pos_master = p
+
     def enforce_boundary(self, regions): # this loops through the regions and pushes out flockers that are within boundary regions
         for i in regions:
             if i.boundary_bool == True:
@@ -217,12 +226,12 @@ class manifest:
                 i.push()
 
     def update_velocity(self, space):
-        new_master_velocity = np.array([])
+        space_copy = space # I think if I make a copy of the space it will fix the ordering issue
         for i in range(len(space.container_regions)):
-            pos, vel, slices = self.connect_adj_regions(space, i)
-            print("slices "+str(slices))
-            tree = self.make_tree(pos)
-            pos = np.array([np.real(pos), np.imag(pos)])
+            pos, vel, slices = self.connect_adj_regions(space_copy, i)
+            print("master: "+ str(space_copy.manifest.vel_master))
+            print(vel)
+            tree = self.make_tree(pos) 
             for j in range(len(space.container_regions[i].list_pos)):
                 pos_local = space.container_regions[i].list_pos
                 pos_local = np.array([np.real(pos_local), np.imag(pos_local)])
@@ -230,22 +239,21 @@ class manifest:
                 hood = self.get_hood(pos_local[:,j],tree)
                 print(hood)
                 print("vel: "+ str(space.container_regions[i].list_vel))
+                print(vel[hood])
                 print(np.average(vel[hood]))
                 space.container_regions[i].list_vel[j] = np.average(vel[hood])
                 print("updated" + str(space.container_regions[i].list_vel))
-                        
-        print(new_master_velocity)
-        return new_master_velocity
-            
+        self.reform_master_list(space)
 
     def connect_adj_regions(self, space, index): # creats a shared list between adjacent regions
         # returns list of velocities and positions of all flockers contained in adjacent and the region of interest
         # this function assumes regions in the regions list are adjacent, so whe using it use care to arrange regions that way
         n_pos_list= np.array([])
         n_vel_list= np.array([])
+        s = space
         i = index
-        region = space.container_regions
-                                  
+        region = s.container_regions
+                                          
         n_pos_list = np.append(n_pos_list, region[i].list_pos)
         n_pos_list = np.append(n_pos_list, region[i-1].list_pos)
         n_pos_list = np.append(n_pos_list, region[(i+1)%len(region)].list_pos)
