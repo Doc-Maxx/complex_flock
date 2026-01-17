@@ -1,5 +1,7 @@
 import numpy as np
 import scipy.spatial as spp
+import copy
+from copy import deepcopy
 
 class space:
     def __init__(self, regions, manifest, dt):
@@ -226,9 +228,11 @@ class manifest:
                 i.push()
 
     def update_velocity(self, space):
-        space_copy = space # I think if I make a copy of the space it will fix the ordering issue
+        space_copy = copy.deepcopy(space) # Make a deep copy of the space it will fix the ordering issue
         for i in range(len(space.container_regions)):
             pos, vel, slices = self.connect_adj_regions(space_copy, i)
+            print(space)
+            print(space_copy)
             print("master: "+ str(space_copy.manifest.vel_master))
             print(vel)
             tree = self.make_tree(pos) 
@@ -251,6 +255,7 @@ class manifest:
         n_pos_list= np.array([])
         n_vel_list= np.array([])
         s = space
+        print(s)
         i = index
         region = s.container_regions
                                           
