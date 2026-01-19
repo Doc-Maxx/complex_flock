@@ -198,11 +198,20 @@ class manifest:
         self.vel_master=np.append(self.vel_master, vel)
 
     def spawn_flockers(self, N, region, alignment='random'): # generates a list of flockers 
-        # this is done within around the origin of a region
-        positions=np.random.rand(N,2).view(np.complex128).flatten()+region.origin
-        velocities=np.random.rand(N,2).view(np.complex128).flatten()
-        self.pos_master=np.append(self.pos_master, positions)
-        self.vel_master=np.append(self.vel_master, velocities)
+        if region.type != "rectangle":
+            print("spawn_flockers only supports rectangular regions.")
+        else:
+            # this is done within around the origin of a region
+            positions=np.random.rand(N,2).view(np.complex128).flatten()
+            velocities=np.random.rand(N,2).view(np.complex128).flatten()
+            #need to scale the flockers and rotate them by rectangle region's angle
+            pos_real = np.real(positions)*np.abs(region.diff)
+            pos_imag = np.imag(positions)*region.thickness
+            positions = pos_real + pos_imag*1j
+            positions = region.rotate_points(positions, u=-1) + region.origin
+  
+            self.pos_master=np.append(self.pos_master, positions)
+            self.vel_master=np.append(self.vel_master, velocities)
 
     def split_flockers(self, space): # This splits the manifest by filling each region with flockers within each region
         # returns nothing
