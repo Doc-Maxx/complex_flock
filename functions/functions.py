@@ -144,7 +144,7 @@ class rectangle(region):
         self.boundary = boundary_bool
         self.list_pos = np.array([]) # Each region can have a list of flockers assigned to it via the manifest
         self.list_vel = np.array([]) # same but contains their velocity information
-
+        self.type = "rectangle"
 
     def rotate_points(self, points, u = 1): # rotates points as much as the rectangle needs to be rotated for self.rotate_points
         return points * np.e**(-1j * self.angle * u)
