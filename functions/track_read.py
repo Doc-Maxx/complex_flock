@@ -7,13 +7,12 @@ import numpy as np
 def read_track(file):
     with open("./tracks/"+file+".txt", 'r') as f:
         track_reader = csv.reader(f)
-        return region_builder(track_reader)
+        return region_builder(track_reader, file)
 
-def region_builder(reader):
+def region_builder(reader, file):
     track_reader = reader
     regions = []
     for row in track_reader:
-        print(row)
         if row[0] == "rectangle":
             new = rect_row_reader(row)
             regions.append(new)
@@ -23,6 +22,7 @@ def region_builder(reader):
         elif row[0] == "ring":
             new = ring_row_reader(row)
             regions.append(new)
+    print("Track: "+file+" built." + " Region list length: "+str(len(regions)))
     return regions
 
 def rect_row_reader(row):
@@ -57,7 +57,3 @@ def str_to_bool(str):
         return False
     else:
         print("Error: Bool passed might not be capitalized")    
-
-regions = read_track(file = "race_track")
-for i in regions:
-    print(i.type)
