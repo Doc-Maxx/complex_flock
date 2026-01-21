@@ -1,7 +1,7 @@
 import csv
 import sys
 sys.path.append("./functions")
-import functions as fn
+from functions import functions as fn
 import numpy as np
 
 def read_track(file):
@@ -47,7 +47,7 @@ def ring_row_reader(row):
     return fn.ring(origin=origin, radius_inner= radius_i, radius_outer=radius_o, arc = arc, boundary_bool=bound)
 
 def degree_to_radian(ang):
-    return ang * (np.pi / 360)
+    return ang * (2*np.pi / 360)
 
 def str_to_bool(str):
     str = str.replace(" ", "")

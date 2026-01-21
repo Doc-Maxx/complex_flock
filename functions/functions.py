@@ -42,7 +42,7 @@ class ring(region):
         c1 = mags <= self.radius_outer 
         c2 = self.radius_inner <= mags
         c3 = ang < self.arc[1]  
-        c4 = self.arc[0] <= ang 
+        c4 = self.arc[0] <= ang
         condition = np.all([c1,c2,c3,c4],axis=0)
         return np.where(condition, True, False)
 
@@ -63,20 +63,20 @@ class ring(region):
     def rotate_points(self, angle, points, u = 1): # rotates points such that they lie entirely on the imaginary axis
         return points * np.e**(-1j * (angle - np.pi) * u ) # this method works differently than the other rotare points
 
-    def push(self): # pushes boids out into the interior side of the ring
+    def push(self): # pushes boids out into the interior side of th:withihne ring
         # returns nothing 
         # We rotate the points counter clockwise so that their corresponding intersection points lie on the imaginary axis
         # We then reflect the velocity and positions across the horizontal line intersecting that intersection point
         # This reflection is done by taking the complex conjugate
-        intersection_angles = np.angle(self.intersection_point)
+        intersection_angles = np.angle(self.intersection())
         shifted_point = self.list_pos - self.origin
         shifted_point = self.rotate_points(intersection_angles, shifted_point)
         shifted_point = np.conjugate(shifted_point)
-        list.list_pos = self.rotate_points(intersection_angles, shifted_point, u=-1) + self.origin
+        self.list_pos = self.rotate_points(intersection_angles, shifted_point, u=-1) + self.origin
 
         shifted_vel = self.rotate_points(intersection_angles, self.list_vel)
         shifted_vel = np.conjugate(shifted_vel)
-        list.list_pos = self.rotate_points(intersection_angles, shifted_vel, u=-1)
+        self.list_vel = self.rotate_points(intersection_angles, shifted_vel, u=-1)
 
 class circle(region):
     def __init__(self, origin,radius,arc=np.array([-np.pi, np.pi]), eps = 0.0001, boundary_bool=False):
@@ -125,9 +125,9 @@ class circle(region):
     def push(self): # using the intersection_point method, this computes the new position and velocity for the region list
         # that is it enforces the boundary by pushing flockers out of the (semi)circle
         # returns nothing
-        diff = self.list_pos-self.intersection_point # find the number between the intersection point and the point within
-        self.list_pos = self.intersection_point-diff*1j # move perpendicularly that distance from UHHH NEED TO CHECK THIS MATH
-        reflected_angle = np.angle(self.intersection_point)-np.angle(self.list_vel)+np.pi
+        diff = self.list_pos-self.intersection() # find the number between the intersection point and the point within
+        self.list_pos = self.intersection()-diff*1j # move perpendicularly that distance from UHHH NEED TO CHECK THIS MATH
+        reflected_angle = np.angle(self.intersection())-np.angle(self.list_vel)+np.pi
         self.list_vel = self.list_vel * np.e**(-1j * reflected_angle)
   
 class rectangle(region):
@@ -183,9 +183,10 @@ class rectangle(region):
         self.list_vel = self.rotate_points(rotated_vel, u=-1) # undo the rotation and set the new velocities
         
 class manifest:
-    def __init__(self, radius):
+    def __init__(self, radius, velocity_scale):
         self.pos_master = np.array([]) # master list of positions 
         self.vel_master = np.array([]) # master list of velocities
+        self.velocity_scale = velocity_scale
         self.radius = radius
 
 
@@ -203,7 +204,7 @@ class manifest:
         else:
             # this is done within around the origin of a region
             positions=np.random.rand(N,2).view(np.complex128).flatten()
-            velocities=np.random.rand(N,2).view(np.complex128).flatten()
+            velocities=np.random.rand(N,2).view(np.complex128).flatten()*self.velocity_scale
             #need to scale the flockers and rotate them by rectangle region's angle
             pos_real = np.real(positions)*np.abs(region.diff)
             pos_imag = np.imag(positions)*region.thickness
@@ -218,6 +219,7 @@ class manifest:
         # This method allows overlapping regions to have duplicate flockers
         for i in space.regions: # loop through region list 
             condition_split = i.vec_within(self.pos_master) # create boolean conditions for splitting up the master list into regional lists
+            print(condition_split)
             i.list_pos = np.extract(condition_split, self.pos_master)
             i.list_vel = np.extract(condition_split, self.vel_master)
 
@@ -232,8 +234,8 @@ class manifest:
 
     def enforce_boundary(self, regions): # this loops through the regions and pushes out flockers that are within boundary regions
         for i in regions:
-            if i.boundary_bool == True:
-                condition = i.vec_within(self.i.list_pos)
+            if i.boundary == True:
+                condition = i.vec_within(i.list_pos)
                 i.push()
 
     def update_velocity(self, space):
