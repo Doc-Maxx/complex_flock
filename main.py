@@ -2,6 +2,7 @@ import sys
 sys.path.append("functions/")
 from functions import functions as fn
 from functions import track_read as rd
+from functions import plotting as plot
 import numpy as np
 file = "race_track"
 
@@ -25,3 +26,5 @@ print("aaa")
 for i in s.regions:
     print((i.list_vel))
     print(i.type)
+
+plot.plot(s)

@@ -21,7 +21,7 @@ class space:
 
     def create_boundary_regions(self):
         b_regions = []
-        for i in self.b_regions:
+        for i in self.regions:
             if i.boundary == True:
                 b_regions.append(i)
         return b_regions

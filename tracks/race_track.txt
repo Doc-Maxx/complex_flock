@@ -2,7 +2,7 @@ rectangle, 0+0j, 1+0j, 1, False
 rectangle, 1+0j, 2+0j, 1, False
 rectangle, 2+0j, 3+0j, 1, False
 rectangle, 3+0j, 0+0j, 1, True
-rectangle, 0+1j, 3+0j, 0.5, True
+rectangle, 0+1j, 3+1j, 0.5, True
 circle, 3+1.5j, 0.5, -90, 90, True
 ring, 3+1.5j, 0.5, 1.5, 0, 90, False
 ring, 3+1.5j, 0.5, 1.5, -90, 0, False 
