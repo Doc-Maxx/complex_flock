@@ -20,7 +20,7 @@ def plot_flockers(space, axes):
     vr = np.array([np.real(space.manifest.vel_master)])
     vi = np.array([np.imag(space.manifest.vel_master)]) 
     ang = np.angle(space.manifest.vel_master)
-    quiv = axes.quiver(pr, pi,vr,vi, (ang + np.pi/(2*np.pi)))
+    quiv = axes.quiver(pr, pi,vr,vi, (ang /(2*np.pi)))
     return quiv
 
 def add_line(region, axes):
