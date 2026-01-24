@@ -7,7 +7,7 @@ import numpy as np
 file = "race_track"
 
 N = 500
-steps = 5000
+steps = 150
 r = rd.read_track(file)
 m = fn.manifest(0.1,0.1)
 s = fn.space(r,m,0.1)

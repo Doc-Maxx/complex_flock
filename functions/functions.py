@@ -234,7 +234,7 @@ class manifest:
     def reform_master_list(self, space):
         v = np.array([])
         p = np.array([])
-        for i in space.container_regions:
+        for i in space.regions:
             v = np.append(v, i.list_vel)
             p = np.append(p, i.list_pos)
         self.vel_master = v
@@ -244,14 +244,14 @@ class manifest:
         for i in regions:
             if i.boundary == True:
                 i.push()
-                for j in regions:
-                    condition = j.vec_within(i.list_pos)
+                """for j in regions:
+                   condition = j.vec_within(i.list_pos)
                     to_remove_pos = np.extract(condition, i.list_pos)
                     to_remove_vel = np.extract(condition, i.list_vel)
                     j.list_pos = np.append(j.list_pos, to_remove_pos)
                     j.list_vel = np.append(j.list_vel, to_remove_vel)
                     i.list_pos = i.list_pos[np.invert(condition)]
-                    i.list_vel = i.list_vel[np.invert(condition)]
+                    i.list_vel = i.list_vel[np.invert(condition)]   """
 
 
 
