@@ -6,16 +6,25 @@ from copy import deepcopy
 class space:
     def __init__(self, regions, manifest, dt):
         self.regions = regions # list of regions, contains geometric information inparticular boundaries
-        self.container_regions = self.create_container_regions(self.regions)
+        self.container_regions = self.create_container_regions()
+        self.boundary_regions = self.create_boundary_regions()
         self.manifest = manifest # list of flockers
         self.dt = dt # step size
+        
 
-    def create_container_regions(self, regions):
+    def create_container_regions(self):
         container_regions = []
-        for i in regions:
+        for i in self.regions:
             if i.boundary == False:
                 container_regions.append(i)
         return container_regions
+
+    def create_boundary_regions(self):
+        b_regions = []
+        for i in self.b_regions:
+            if i.boundary == True:
+                b_regions.append(i)
+        return b_regions
 
 class region:
     def __init__(self, origin=0+0j, eps = 0.0001, boundary_bool=False):
