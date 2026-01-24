@@ -5,20 +5,23 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Wedge
-import matplotlib.animation as animation
 
 def plot(space, dpi = 100):
     fig, ax = plt.subplots()
     for i in space.boundary_regions:
         add_line(i, ax)
+    q = plot_flockers(space,ax)
     ax.autoscale_view()
-    fig.savefig("./figs/test.png",dpi)
+    fig.savefig("./figs/test.png", dpi=dpi)
 
 def plot_flockers(space, axes):
     pr = np.array([np.real(space.manifest.pos_master)])
     pi = np.array([np.imag(space.manifest.pos_master)])
+    vr = np.array([np.real(space.manifest.vel_master)])
+    vi = np.array([np.imag(space.manifest.vel_master)]) 
     ang = np.angle(space.manifest.vel_master)
-    axes.scatter(pr,pi)
+    quiv = axes.quiver(pr, pi,vr,vi, (ang + np.pi/(2*np.pi)))
+    return quiv
 
 def add_line(region, axes):
     patches = []

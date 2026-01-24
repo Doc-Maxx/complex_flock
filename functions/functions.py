@@ -227,8 +227,7 @@ class manifest:
         # returns nothing
         # This method allows overlapping regions to have duplicate flockers
         for i in space.regions: # loop through region list 
-            condition_split = i.vec_within(self.pos_master) # create boolean conditions for splitting up the master list into regional lists
-            print(condition_split)
+            condition_split = i.vec_within(self.pos_master) # create boolean conditions for splitting up the master list into regional lists 
             i.list_pos = np.extract(condition_split, self.pos_master)
             i.list_vel = np.extract(condition_split, self.vel_master)
 
@@ -244,8 +243,18 @@ class manifest:
     def enforce_boundary(self, regions): # this loops through the regions and pushes out flockers that are within boundary regions
         for i in regions:
             if i.boundary == True:
-                condition = i.vec_within(i.list_pos)
                 i.push()
+                for j in regions:
+                    condition = j.vec_within(i.list_pos)
+                    to_remove_pos = np.extract(condition, i.list_pos)
+                    to_remove_vel = np.extract(condition, i.list_vel)
+                    j.list_pos = np.append(j.list_pos, to_remove_pos)
+                    j.list_vel = np.append(j.list_vel, to_remove_vel)
+                    i.list_pos = i.list_pos[np.invert(condition)]
+                    i.list_vel = i.list_vel[np.invert(condition)]
+
+
+
 
     def update_velocity(self, space):
         space_copy = copy.deepcopy(space) # Make a deep copy of the space it will fix the ordering issue
