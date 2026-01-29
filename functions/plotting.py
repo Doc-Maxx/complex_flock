@@ -5,14 +5,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Wedge
+import time
 
-def plot(space, dpi = 100):
+def plot(space, file=time.time(),dpi = 100):
     fig, ax = plt.subplots()
     for i in space.boundary_regions:
         add_line(i, ax)
     q = plot_flockers(space,ax)
     ax.autoscale_view()
-    fig.savefig("./figs/test.png", dpi=dpi)
+    fig.savefig("./figs/"+str(file)+".png", dpi=dpi)
 
 def plot_flockers(space, axes):
     pr = np.array([np.real(space.manifest.pos_master)])

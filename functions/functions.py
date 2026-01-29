@@ -60,12 +60,11 @@ class ring(region):
         slope = - self.list_vel.imag / (self.list_vel.real + self.eps) # compute the slope of the line defining the trajectory from the last point
         # The algebra results in a quadratic equation - what follows is a calculation for a b and c
         # To do this self solve the system of equations for defining a circle and a line
-        c = shifted_point.real**2 + shifted_point.imag**2 - self.radius_inner**2 - 2*shifted_point.real*shifted_point.imag*slope
-        b = 2*slope*(-shifted_point.real*slope + shifted_point.imag)
-        a = slope**2 + 1
+        b = np.imag(shifted_point) - np.real(shifted_point)*slope
+
         # We take the positive solution
-        x_int = (-2*b + np.sqrt(b**2 - 4*a*c))/(2*a)
-        y_int = slope*x_int + shifted_point.imag - slope*shifted_point.real
+        x_int = (-b*slope + np.emath.sqrt(-b**2 + slope**2 * self.radius_inner + self.radius_inner) )/(slope**2 + 1)       
+        y_int = (b + slope*np.emath.sqrt(-b**2 + slope**2 * self.radius_inner + self.radius_inner) )/(slope**2 + 1) 
         intersection_point = x_int + y_int*1j
         return intersection_point # return the intersection point as a complex value
 
@@ -126,7 +125,7 @@ class circle(region):
         b = 2*slope*(-shifted_point.real*slope + shifted_point.imag)
         a = slope**2 + 1
         # We take the positive solution
-        x_int = (-2*b + np.sqrt(b**2 - 4*a*c))/(2*a)
+        x_int = (-2*b + np.emath.sqrt(b**2 - 4*a*c))/(2*a)
         y_int = slope*x_int + shifted_point.imag - slope*shifted_point.real
         intersection_point = x_int + y_int*1j
         return intersection_point # return the intersection point as a complex value
