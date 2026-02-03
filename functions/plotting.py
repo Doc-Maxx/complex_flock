@@ -2,6 +2,7 @@ import sys
 sys.path.append("./functions")
 import functions as fn 
 import numpy as np 
+import physics as ph
 from matplotlib import pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Wedge

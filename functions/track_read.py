@@ -2,12 +2,19 @@ import csv
 import sys
 sys.path.append("./functions")
 from functions import functions as fn
+from functions import physics as ph
 import numpy as np
+
 
 def read_track(file):
     with open("./tracks/"+file+".txt", 'r') as f:
         track_reader = csv.reader(f)
         return region_builder(track_reader, file)
+
+def read_track_gen2(file):
+    with open("./tracks/"+file+".txt", 'r') as f:
+        track_reader = csv.reader(f)
+        return region_builder_gen2(track_reader, file)
 
 def region_builder(reader, file):
     track_reader = reader
@@ -24,6 +31,30 @@ def region_builder(reader, file):
             regions.append(new)
     print("Track: "+file+" built." + " Region list length: "+str(len(regions)))
     return regions
+
+def region_builder_gen2(reader, corner_radius, file):
+    lines = []
+    for row in track_reader:
+        if row[0]=="poly":
+            new = poly_reader(row, corner_radius)
+            lines.append(new)
+        else:
+            new = line_reader(row, corner_radius)
+            lines.append(new)
+
+def poly_reader(row, corner_radius):
+    origin = complex(row[1].replace(" ", ""))
+    radius = float(row[2].replace(" ", ""))
+    ori = str_to_bool(row[3])
+    arc = np.array([degree_to_radian(float(row[4])), degree_to_radian(float(row[5]))])
+    N = int(row[6])
+    return ph.make_polygon_arc(origin, radius, corner_radius, ori, arc, N)
+
+def line_reader(row, corner_radius)
+    x1 = complex(row[0].replace(" ", ""))
+    x2 = complex(row[1].replace(" ", ""))
+    return line(x1, x2, corner_radius)
+
 
 def rect_row_reader(row):
     origin = complex(row[1].replace(" ", ""))
