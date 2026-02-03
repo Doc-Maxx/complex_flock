@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.spatial as spp
 
 def i_dot(vec1, vec2):
     return vec1 * np.conjugate(vec2)
@@ -54,11 +55,12 @@ class line:
                 masks[2][i] = False
         return masks
 
-    def push(self, vec):
-        distances, region_masks = self.distances(vec)
+    def push(self, pos, vel):
+        distances, region_masks = self.distances(pos)
         masks = self.get_push_masks(distances, region_masks)
-        for i in vec[masks[0]]:
-            self.corner_push(i)
+        self.corner_push(pos, vel, mask[0], distances)
+        self.line_push(pos, vel, mask[1], distances)
+        self.corner_push(pos, vel, mask[2], distances)
 
     def corner_push(self, pos, vel, mask, distances):
         overlap = 2* self.corner_radius - np.abs(distances)
@@ -70,9 +72,62 @@ class line:
 
     def line_push(self, pos, vel, mask, distances):
         for i in pos[mask]:
-            vec[i] = reflect(i, self.tangent)
+            if i_dot(vec[i], self.normal) < 0:
+                vec[i] = reflect(i, self.tangent)
             pos[i] = reflect(pos[i]-self.x[0], self.tangent) + self.x[0]
 
+class manifest:
+    def __init__(self, interaction_radius, target_velocity, follow_factor, pressure_factor, lines):
+        self.pos = np.array([])
+        self.vel = np.array([])
+        self.interaction_radius = interaction_radius
+        self.target_velocity = target_velocity
+        self.lines = lines
+        self.follow_factor = follow_factor
+        self.pressure_factor = pressure_factor
 
+    def enforce_boundary(self, lines):
+        for i in lines:
+            i.push(self.pos, self.vel)
 
+    def update_velocity(self):
+        reg = self.regulate()
+        tree = make_tree()
+        fol = self.follow_neighbors(tree) * follow_factor
+        pre = self.pressure(tree) * pressure_factor
+        self.vel = reg + fol + pre
+
+    def regulate(self):
+        mags = np.abs(self.vel)
+        fast_mask = np.where(mags>self.target_velocity*(1 + 0.03))
+        slow_mask = np.where(mags<self.target_velocity*(1 - 0.03))
+        vel_contribution = self.vel*0
+        for i in self.vel[fast_mask]:
+            vel_contribution[i] = self.vel[i]*(1-0.01)
+        for i in self.vel[slow_mask]:
+            vel_contribution[i] = self.vel[i]*(1+0.01)
+        return vel_contribution
+
+    def follow_neighbors(self, tree):
+        vel = self.vel
+        vel_contribution = self.vel*0
+        for i in range(len(self.pos)):
+            hood = self.get_hood(self.pos[i], tree)
+            vel_contribution[i] = np.average(vel[hood])
+        return vel_contribution
+
+    def make_tree(self):
+        pos_vec = np.array([np.real(self.pos), np.imag(self.pos)]).T
+        return spp.cKDTree(pos_vec)
+
+    def get_hood(self, pos, tree):
+        return tree.query_ball_point(point, r = self.interaction_radius)
+
+    def pressure(self, tree):
+        vel_contribution = self.vel*0
+        for i in range(len(self.pos)):
+            hood = self.get_hood(self.pos[i], tree)
+            pressure_vec = self.pos[hood] - self.pos[i]
+            vel_contribution[i] = np.average(pressure_vec)
+        return vel_contribution
 
