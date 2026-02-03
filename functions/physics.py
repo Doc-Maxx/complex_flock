@@ -8,6 +8,16 @@ def reflect(vec, mirror_vec):
     rot_angle = np.angle(mirror_vec) - np.angle(vec)
     return vec * e**(1j * rot_angle * 2)
 
+def make_polygon_arc(origin, radius, corner_radius, ori=True, arc, N):
+    lines_list = []
+    angles = np.linspace(arc[0],arc[1], N)
+    if ori == False:
+        angles = np.flip(angles)
+    points = origin + radius*e**(1j * angles)
+    for i in range(N):
+        lines_list.append(line(points[i], points[i+1], corner_radius))
+    return lines_list
+
 class line:
     def __init__(self, x1, x2, corner_radius):
         self.x = np.array([x1,x2])
@@ -16,7 +26,7 @@ class line:
         self.normal = self.make_normal()
         self.region_projection = i_dot(self.x, self.tangent)
         self.angle = self.angle()
-        self.R_c = corner_radius
+        self.corner_radius = corner_radius
 
     def make_normal(self):
         return self.tangent*1j
