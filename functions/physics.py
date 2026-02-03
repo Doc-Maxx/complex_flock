@@ -141,3 +141,9 @@ class manifest:
             vel_contribution[i] = np.average(pressure_vec)
         return vel_contribution
 
+    def spawn_flockers(self, N, origin, alignment='random'):
+        positions = np.random.rand(N,2).view(np.complex128).flatten() + origin
+        velocities = np.random.rand(N,2).view(np.complex128).flatten()
+
+        self.pos = positions
+        self.vel = velocities
