@@ -54,11 +54,11 @@ def plot_gen2(manifest, file=time.time(),dpi = 100):
     fig, ax = plt.subplots()
     for i in manifest.lines:
         add_line_gen2(i, ax)
-    q = plot_flockers_gen2(space,ax)
+    q = plot_flockers_gen2(manifest,ax)
     ax.autoscale_view()
     fig.savefig("./figs/"+str(file)+".png", dpi=dpi)
 
-def add_line_gen2 = (line, axes):
+def add_line_gen2(line, axes):
     axes.plot(np.real(line.x), np.imag(line.x))
 
 def plot_flockers_gen2(manifest, axes):

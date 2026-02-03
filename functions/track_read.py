@@ -1,6 +1,7 @@
 import csv
 import sys
 sys.path.append("./functions")
+import itertools
 from functions import functions as fn
 from functions import physics as ph
 import numpy as np
@@ -11,10 +12,10 @@ def read_track(file):
         track_reader = csv.reader(f)
         return region_builder(track_reader, file)
 
-def read_track_gen2(file):
+def read_track_gen2(file, corner_radius):
     with open("./tracks/"+file+".txt", 'r') as f:
         track_reader = csv.reader(f)
-        return region_builder_gen2(track_reader, file)
+        return region_builder_gen2(track_reader, corner_radius,file)
 
 def region_builder(reader, file):
     track_reader = reader
@@ -34,26 +35,27 @@ def region_builder(reader, file):
 
 def region_builder_gen2(reader, corner_radius, file):
     lines = []
-    for row in track_reader:
+    for row in reader:
         if row[0]=="poly":
             new = poly_reader(row, corner_radius)
-            lines.append(new)
+            lines.extend(new)
         else:
             new = line_reader(row, corner_radius)
             lines.append(new)
+    return lines
 
 def poly_reader(row, corner_radius):
     origin = complex(row[1].replace(" ", ""))
     radius = float(row[2].replace(" ", ""))
     ori = str_to_bool(row[3])
-    arc = np.array([degree_to_radian(float(row[4])), degree_to_radian(float(row[5]))])
+    arc = np.array([degree_to_radian(float(row[4].replace(" ",""))), degree_to_radian(float(row[5].replace(" ","")))])
     N = int(row[6])
-    return ph.make_polygon_arc(origin, radius, corner_radius, ori, arc, N)
+    return ph.make_polygon_arc(origin=origin,radius= radius,corner_radius= corner_radius, ori =ori, arc=arc, N=N)
 
-def line_reader(row, corner_radius)
+def line_reader(row, corner_radius):
     x1 = complex(row[0].replace(" ", ""))
     x2 = complex(row[1].replace(" ", ""))
-    return line(x1, x2, corner_radius)
+    return ph.line(x1, x2, corner_radius)
 
 
 def rect_row_reader(row):

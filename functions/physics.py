@@ -6,23 +6,23 @@ def i_dot(vec1, vec2):
 
 def reflect(vec, mirror_vec):
     rot_angle = np.angle(mirror_vec) - np.angle(vec)
-    return vec * e**(1j * rot_angle * 2)
+    return vec * np.e**(1j * rot_angle * 2)
 
-def make_polygon_arc(origin, radius, corner_radius, ori=True, arc, N):
+def make_polygon_arc(origin, radius, corner_radius, ori, arc, N):
     lines_list = []
     angles = np.linspace(arc[0],arc[1], N)
     if ori == False:
         angles = np.flip(angles)
-    points = origin + radius*e**(1j * angles)
-    for i in range(N):
+    points = origin + radius*np.e**(1j * angles)
+    for i in range(N-1):
         lines_list.append(line(points[i], points[i+1], corner_radius))
     return lines_list
 
 class line:
     def __init__(self, x1, x2, corner_radius):
         self.x = np.array([x1,x2])
-        self.mag_x = np.abs(x)
-        self.tangent = (self.x[1] - self.x[2])/np.abs(self.x[1] - self.x[2])
+        self.mag_x = np.abs(self.x)
+        self.tangent = (self.x[0] - self.x[1])/np.abs(self.x[0] - self.x[1])
         self.normal = self.make_normal()
         self.region_projection = i_dot(self.x, self.tangent)
         self.angle = self.angle()
@@ -32,7 +32,7 @@ class line:
         return self.tangent*1j
 
     def angle(self):
-        return = np.angle(self.tangent)
+        return np.angle(self.tangent)
 
     def get_region_masks(self, vec):
         p = i_dot(vec, self.tangent)
@@ -61,7 +61,7 @@ class line:
             if distances[i] > 0+self.corner_radius:
                 masks[1][i] = False
         for i in np.where(region_masks[2]):
-            if np.mag(distances[i]) > 2*self.corner_radius
+            if np.mag(distances[i]) > 2*self.corner_radius:
                 masks[2][i] = False
         return masks
 
