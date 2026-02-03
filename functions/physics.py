@@ -96,6 +96,11 @@ class manifest:
         self.follow_factor = follow_factor
         self.pressure_factor = pressure_factor
 
+    def step(self, dt):
+        self.pos = self.pos + self.vel*dt
+        self.enforce_boundary()
+        self.update_velocity()
+
     def enforce_boundary(self, lines):
         for i in lines:
             i.push(self.pos, self.vel)
