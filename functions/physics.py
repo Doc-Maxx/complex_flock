@@ -37,45 +37,57 @@ class line:
     def get_region_masks(self, vec):
         p = i_dot(vec, self.tangent)
         r0_mask = p < self.region_projection[0]
-        r1_mask = self.region_projection[0] < p < self.region_projection[1]
+        c1 = self.region_projection[0] < p
+        c2 = p < self.region_projection[1]
+        r1_mask = np.all([c1,c2],axis=0)
         r2_mask = self.region_projection[1] < p
         return r0_mask, r1_mask, r2_mask
 
     def distance(self, vec):
-        d = np.array([])
+        d = vec*0
         masks = self.get_region_masks(vec)
+        print(masks)
         for i in np.where(masks[0]):
+            if len(np.where(masks[0])) == 1:
+                break
             d[i] = vec - self.x[0]
         for i in np.where(masks[1]):
-            d[i] = i_dot(vec, self.normal)
+            d[i] = i_dot(vec[i], self.normal)
         for i in np.where(masks[2]):
+            if len(np.where(masks[2])) == 1:
+                break
             d[i] = vec - self.x[1]
+        print(d)
         return d, masks
 
     def get_push_masks(self, distances, region_masks):
         masks = region_masks
         for i in np.where(region_masks[0]):
-            if np.abs(distances[i]) > 2*self.corner_radius:
-                masks[0][i] = False
+            for j in distances[i]:
+                if np.abs(j) > 2*self.corner_radius:
+                    masks[0][i] = False
         for i in np.where(region_masks[1]):
             if distances[i] > 0+self.corner_radius:
                 masks[1][i] = False
         for i in np.where(region_masks[2]):
-            if np.mag(distances[i]) > 2*self.corner_radius:
-                masks[2][i] = False
+            for j in distances[i]:
+                if np.abs(j) > 2*self.corner_radius:
+                    masks[2][i] = False
         return masks
 
     def push(self, pos, vel):
-        distances, region_masks = self.distances(pos)
+        distances, region_masks = self.distance(pos)
         masks = self.get_push_masks(distances, region_masks)
-        self.corner_push(pos, vel, mask[0], distances)
-        self.line_push(pos, vel, mask[1], distances)
-        self.corner_push(pos, vel, mask[2], distances)
+        self.corner_push(pos, vel, masks[0], distances)
+        self.line_push(pos, vel, masks[1], distances)
+        self.corner_push(pos, vel, masks[2], distances)
 
     def corner_push(self, pos, vel, mask, distances):
         overlap = 2* self.corner_radius - np.abs(distances)
-        overlap_dir = distances / np.abs(distances)
-        for i in pos[mask]:
+        overlap_dir = np.linalg.norm(distances)
+        print(overlap_dir)
+        for i in np.where(mask):
+            print(i)
             tangent = overlap_dir[i]*-1j
             vel[i] = reflect(i, tangent)
             pos[i] = pos[i] + overlap[i] * overlap_dir[i]
@@ -101,13 +113,13 @@ class manifest:
         self.enforce_boundary()
         self.update_velocity()
 
-    def enforce_boundary(self, lines):
-        for i in lines:
+    def enforce_boundary(self):
+        for i in self.lines:
             i.push(self.pos, self.vel)
 
     def update_velocity(self):
         reg = self.regulate()
-        tree = make_tree()
+        tree = self.make_tree()
         fol = self.follow_neighbors(tree) * follow_factor
         pre = self.pressure(tree) * pressure_factor
         self.vel = reg + fol + pre
@@ -133,6 +145,7 @@ class manifest:
 
     def make_tree(self):
         pos_vec = np.array([np.real(self.pos), np.imag(self.pos)]).T
+        print(pos_vec)
         return spp.cKDTree(pos_vec)
 
     def get_hood(self, pos, tree):
