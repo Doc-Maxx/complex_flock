@@ -110,7 +110,7 @@ class manifest:
 
     def step(self, dt):
         self.pos = self.pos + self.vel*dt
-        self.enforce_boundary()
+        #self.enforce_boundary()
         self.update_velocity()
 
     def enforce_boundary(self):
@@ -130,9 +130,9 @@ class manifest:
         slow_mask = np.where(mags<self.target_velocity*(1 - 0.03))
         vel_contribution = self.vel*0
         for i in self.vel[fast_mask]:
-            vel_contribution[i] = self.vel[i]*(1-0.01)
+            vel_contribution[i] = i*(1-0.01)
         for i in self.vel[slow_mask]:
-            vel_contribution[i] = self.vel[i]*(1+0.01)
+            vel_contribution[i] = i*(1+0.01)
         return vel_contribution
 
     def follow_neighbors(self, tree):
