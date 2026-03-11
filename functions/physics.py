@@ -19,14 +19,14 @@ def make_polygon_arc(origin, radius, corner_radius, ori, arc, N):
     return lines_list
 
 class line:
-    def __init__(self, x1, x2, corner_radius):
+    def __init__(self, x1, x2):
         self.x = np.array([x1,x2])
         self.mag_x = np.abs(self.x)
-        self.tangent = (self.x[0] - self.x[1])/np.abs(self.x[0] - self.x[1])
+        self.tangent = (self.x[1] - self.x[0])/np.abs(self.x[1] - self.x[0])
         self.normal = self.make_normal()
         self.region_projection = i_dot(self.x, self.tangent)
         self.angle = self.angle()
-        self.corner_radius = corner_radius
+        self.x_prime = (self.x - self.x[0]) * np.e^(-1j * self.angle)
 
     def make_normal(self):
         return self.tangent*1j
@@ -34,73 +34,10 @@ class line:
     def angle(self):
         return np.angle(self.tangent)
 
-    def get_region_masks(self, vec):
-        p = i_dot(vec, self.tangent)
-        r0_mask = p < self.region_projection[0]
-        c1 = self.region_projection[0] < p
-        c2 = p < self.region_projection[1]
-        r1_mask = np.all([c1,c2],axis=0)
-        r2_mask = self.region_projection[1] < p
-        return r0_mask, r1_mask, r2_mask
-
-    def distance(self, vec):
-        d = vec*0
-        masks = self.get_region_masks(vec)
-        print(masks)
-        for i in np.where(masks[0]):
-            if len(np.where(masks[0])) == 1:
-                break
-            d[i] = vec - self.x[0]
-        for i in np.where(masks[1]):
-            d[i] = i_dot(vec[i], self.normal)
-        for i in np.where(masks[2]):
-            if len(np.where(masks[2])) == 1:
-                break
-            d[i] = vec - self.x[1]
-        print(d)
-        return d, masks
-
-    def get_push_masks(self, distances, region_masks):
-        masks = region_masks
-        for i in np.where(region_masks[0]):
-            for j in distances[i]:
-                if np.abs(j) > 2*self.corner_radius:
-                    masks[0][i] = False
-        for i in np.where(region_masks[1]):
-            if distances[i] > 0+self.corner_radius:
-                masks[1][i] = False
-        for i in np.where(region_masks[2]):
-            for j in distances[i]:
-                if np.abs(j) > 2*self.corner_radius:
-                    masks[2][i] = False
-        return masks
-
-    def push(self, pos, vel):
-        distances, region_masks = self.distance(pos)
-        masks = self.get_push_masks(distances, region_masks)
-        self.corner_push(pos, vel, masks[0], distances)
-        self.line_push(pos, vel, masks[1], distances)
-        self.corner_push(pos, vel, masks[2], distances)
-
-    def corner_push(self, pos, vel, mask, distances):
-        overlap = 2* self.corner_radius - np.abs(distances)
-        overlap_dir = np.linalg.norm(distances)
-        print(overlap_dir)
-        for i in np.where(mask):
-            print(i)
-            tangent = overlap_dir[i]*-1j
-            vel[i] = reflect(i, tangent)
-            pos[i] = pos[i] + overlap[i] * overlap_dir[i]
-
-    def line_push(self, pos, vel, mask, distances):
-        for i in pos[mask]:
-            if i_dot(vec[i], self.normal) < 0:
-                vec[i] = reflect(i, self.tangent)
-            pos[i] = reflect(pos[i]-self.x[0], self.tangent) + self.x[0]
-
 class manifest:
-    def __init__(self, interaction_radius, target_velocity, follow_factor, pressure_factor, lines):
+    def __init__(self, interaction_radius, target_velocity, follow_factor=1, pressure_factor=0, lines):
         self.pos = np.array([])
+        self.pos_last = np.array([])
         self.vel = np.array([])
         self.interaction_radius = interaction_radius
         self.target_velocity = target_velocity
@@ -114,8 +51,20 @@ class manifest:
         self.update_velocity()
 
     def enforce_boundary(self):
-        for i in self.lines:
-            i.push(self.pos, self.vel)
+        for i in lines:
+            self.detection(i)
+            self.disambiguation()
+            self.reflect_pos()
+            self.reflect_vel()
+
+    def detection(line):
+        before_ = i_dot(line.normal, self.pos_last)
+        after_ = i_dot(line.normal, self.pos)
+        before_bool = np.greater(before_, 0)
+        after_bool = np.less_equal(after_, 0)
+        return before_bool & after_bool
+
+
 
     def update_velocity(self):
         reg = self.regulate()
