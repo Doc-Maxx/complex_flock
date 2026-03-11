@@ -52,8 +52,8 @@ class manifest:
 
     def enforce_boundary(self):
         for i in lines:
-            self.detection(i)
-            self.disambiguation()
+            detection_mask = self.detection(i)
+            disambiguated_mask, x_int = self.disambiguation(i, detection_mask)
             self.reflect_pos()
             self.reflect_vel()
 
@@ -64,6 +64,24 @@ class manifest:
         after_bool = np.less_equal(after_, 0)
         return before_bool & after_bool
 
+    def disambiguation(line, detection_mask):
+        x_int = np.ones(len(detection_mask))*-1
+        for i in range(len(detection_mask)):
+            if detection_mask[i] == True:
+                pos2 = (pos[i] - line.x[0])*np.e^(-1j * line.angle)
+                pos1 = (pos_last[i] - line.x[0])*np.e(-1j * line.angle)
+                diff = pos2 - pos1
+                if np.abs(np.real(diff)) < 1e-6:
+                    x_int[i] = np.real(pos2)
+                else:
+                    m = np.imag(diff)/np.real(diff)
+                    b = np.imag(pos1) - m * np.real(pos1)
+                    x_int[i] = (m * np.real(pos1) - np.imag(pos1)) / m
+        
+        ambiguation_bool = np.logical_and(x_int>0, x_int<line.x_prime[0])
+        disambiguated_mask = detection_mask & ambiguation_bool
+
+        return disambiguated_mask, x_int
 
 
     def update_velocity(self):
