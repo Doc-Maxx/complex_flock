@@ -7,7 +7,7 @@ import numpy as np
 
 file = "race_track_gen2"
 
-N = 5
+N = 30
 lines = rd.read_track_gen2(file,0.05)
 m = ph.manifest(0.1, 0.1, 1, 0.3, lines)
 m.spawn_flockers(N, 0+0j)
