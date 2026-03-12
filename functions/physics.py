@@ -63,7 +63,8 @@ class manifest:
         after_ = i_dot(line.normal, self.pos)
         before_bool = np.greater(before_, 0)
         after_bool = np.less_equal(after_, 0)
-        return before_bool & after_bool
+        detection_bool = before_bool & after_bool
+        return detection_bool
 
     def disambiguation(self, line, detection_mask):
         x_int = np.ones(len(detection_mask))*-1
@@ -81,19 +82,19 @@ class manifest:
 
         ambiguation_bool = np.logical_and(x_int>0, x_int<line.x_prime[0])
         disambiguated_mask = detection_mask & ambiguation_bool
-
         return disambiguated_mask, x_int
 
     def reflect(self, line, disambiguated_mask, x_int):
-        pos2 = (self.pos_last - line.x[0])*np.e**(-1j * line.angle)
+        pos2 = (self.pos - line.x[0])*np.e**(-1j * line.angle)
         vel_new = self.vel*np.e**(-1j * line.angle)
         for i in range(len(disambiguated_mask)):
             if disambiguated_mask[i] == True:
                 pos2[i] = np.conjugate(pos2[i])
                 vel_new[i] = np.conjugate(vel_new[i])
-        pos2 = (self.pos_last)*np.e**(1j * line.angle) + line.x[0]
+        pos3 = (pos2)*np.e**(1j * line.angle) + line.x[0]
+        print(self.pos - pos3)
         vel_new = self.vel*np.e**(1j * line.angle)
-        return pos2, vel_new
+        return pos3, vel_new
 
     def update_velocity(self):
         tree = self.make_tree()
