@@ -89,7 +89,7 @@ class manifest:
                     b = np.imag(pos1) - m * np.real(pos1)
                     x_int[i] = (m * np.real(pos1) - np.imag(pos1)) / m
         
-        ambiguation_bool = np.logical_and(x_int>0, x_int<line.x_prime[1])
+        ambiguation_bool = np.logical_and(x_int>0, x_int<=line.x_prime[1])
         disambiguated_mask = detection_mask & ambiguation_bool
        
 
