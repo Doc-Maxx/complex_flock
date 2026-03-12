@@ -46,7 +46,7 @@ class manifest:
         self.pressure_factor = pressure_factor
 
     def step(self, dt):
-        self.pos = self.pos + self.vel*dt
+        self.pos = self.pos_last + self.vel*dt
         #self.enforce_boundary()
         self.update_velocity()
 
@@ -54,8 +54,9 @@ class manifest:
         for i in lines:
             detection_mask = self.detection(i)
             disambiguated_mask, x_int = self.disambiguation(i, detection_mask)
-            self.reflect_pos()
-            self.reflect_vel()
+            pos_update, vel_update = self.reflect(i, disambiguated_mask, x_int)
+            self.pos = pos_update
+            self.vel = vel_update
 
     def detection(line):
         before_ = i_dot(line.normal, self.pos_last)
@@ -68,8 +69,8 @@ class manifest:
         x_int = np.ones(len(detection_mask))*-1
         for i in range(len(detection_mask)):
             if detection_mask[i] == True:
-                pos2 = (pos[i] - line.x[0])*np.e^(-1j * line.angle)
-                pos1 = (pos_last[i] - line.x[0])*np.e(-1j * line.angle)
+                pos2 = (self.pos[i] - line.x[0])*np.e^(-1j * line.angle)
+                pos1 = (self.pos_last[i] - line.x[0])*np.e(-1j * line.angle)
                 diff = pos2 - pos1
                 if np.abs(np.real(diff)) < 1e-6:
                     x_int[i] = np.real(pos2)
@@ -77,11 +78,23 @@ class manifest:
                     m = np.imag(diff)/np.real(diff)
                     b = np.imag(pos1) - m * np.real(pos1)
                     x_int[i] = (m * np.real(pos1) - np.imag(pos1)) / m
-        
+
         ambiguation_bool = np.logical_and(x_int>0, x_int<line.x_prime[0])
         disambiguated_mask = detection_mask & ambiguation_bool
 
         return disambiguated_mask, x_int
+
+    def reflect(line, disambiguated_mask, x_int):
+        pos2 = (self.pos_last - line.x[0])*np.e(-1j * line.angle)
+        vel_new = self.vel*np.(-1j * line.angle)
+        for i in range(len(disambiguated_mask)):
+            if disambiguated_mask[i] == True:
+                pos2[i] = np.conjugate(pos2[i])
+                vel_new[i] = np.conjugate(vel_new[i])
+        pos2 = (self.pos_last)*np.e(1j * line.angle) + line.x[0]
+        vel_new = self.vel*np.(1j * line.angle)
+        return pos2, vel_new
+        
 
 
     def update_velocity(self):
