@@ -62,8 +62,8 @@ def add_line_gen2(line, axes):
     axes.plot(np.real(line.x), np.imag(line.x))
 
 def plot_flockers_gen2(manifest, axes):
-    pr = np.array([np.real(manifest.pos_last)])
-    pi = np.array([np.imag(manifest.pos_last)])
+    pr = np.array([np.real(manifest.pos)])
+    pi = np.array([np.imag(manifest.pos)])
     vr = np.array([np.real(manifest.vel)])
     vi = np.array([np.imag(manifest.vel)]) 
     ang = np.angle(manifest.vel)
