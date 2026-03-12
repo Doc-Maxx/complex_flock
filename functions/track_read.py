@@ -42,6 +42,7 @@ def region_builder_gen2(reader, corner_radius, file):
         else:
             new = line_reader(row, corner_radius)
             lines.append(new)
+    print(lines)
     lines = ph.weld_lines(lines)
     return lines
 

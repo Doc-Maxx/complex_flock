@@ -22,14 +22,14 @@ def make_polygon_arc(origin, radius, ori, arc, N):
 def compute_shortest_line(lines):
     lengths = np.array([])
     for i in lines:
-        np.append(lengths, i.lengths)
+        lengths = np.append(lengths, i.length)
     return np.min(lengths)
 
 def weld_lines(lines):
     length = compute_shortest_line(lines)
     for i in range(len(lines)):
-        if lines[i].x[1] - lines[i+1].x[0] < length:
-            lines[i+1.x[0]] = lines[i].x[1]
+        if lines[i-1].x[1] - lines[i].x[0] < length:
+            lines[i].x[0] = lines[i-1].x[1]
     return lines
 
 class line:
