@@ -47,11 +47,13 @@ class manifest:
 
     def step(self, dt):
         self.pos = self.pos_last + self.vel*dt
-        #self.enforce_boundary()
+        self.enforce_boundary()
+        self.pos_last = self.pos
         self.update_velocity()
+        
 
     def enforce_boundary(self):
-        for i in lines:
+        for i in self.lines:
             detection_mask = self.detection(i)
             disambiguated_mask, x_int = self.disambiguation(i, detection_mask)
             pos_update, vel_update = self.reflect(i, disambiguated_mask, x_int)
@@ -94,8 +96,6 @@ class manifest:
         pos2 = (self.pos_last)*np.e(1j * line.angle) + line.x[0]
         vel_new = self.vel*np.(1j * line.angle)
         return pos2, vel_new
-        
-
 
     def update_velocity(self):
         reg = self.regulate()
