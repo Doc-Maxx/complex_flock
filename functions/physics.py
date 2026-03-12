@@ -27,8 +27,11 @@ def compute_shortest_line(lines):
 
 def weld_lines(lines):
     length = compute_shortest_line(lines)
+    
     for i in range(len(lines)):
-        if lines[i-1].x[1] - lines[i].x[0] < length:
+        dist = np.abs(lines[i-1].x[1] - lines[i].x[0])
+        print(dist)
+        if dist < length:
             lines[i].x[0] = lines[i-1].x[1]
     return lines
 
