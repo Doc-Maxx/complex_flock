@@ -108,7 +108,8 @@ class manifest:
         vel = self.vel
         vel_contribution = self.vel*0
         for i in range(len(self.pos)):
-            hood = self.get_hood([np.real(self.pos[i]),np.imag(self.pos[i])], tree)
+            point =np.array([ np.real(self.pos[i]) , np.imag(self.pos[i])])
+            hood = self.get_hood(point, tree)
             vel_contribution[i] = np.average(vel[hood])
         return vel_contribution
 
@@ -123,8 +124,10 @@ class manifest:
         vel_contribution = self.vel*0
         for i in range(len(self.pos)):
             hood = self.get_hood(self.pos[i], tree)
-            pressure_vec = self.pos[hood] - self.pos[i]
+            pressure_vec = self.pos[hood] - np.array(np.real(self.pos[i]),np.imag(self.pos[i]))
             vel_contribution[i] = np.average(pressure_vec)
+        print(vel_contribution)
+        vel_contribution = vel_contribution[:,0] + 1j * vel_contribution[:,1]
         return vel_contribution
 
     def spawn_flockers(self, N, origin, alignment='random'):
