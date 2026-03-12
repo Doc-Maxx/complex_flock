@@ -45,10 +45,19 @@ class manifest:
         self.pressure_factor = pressure_factor
 
     def step(self, dt):
+        self.save_date(self, "test")
         self.pos_last = self.pos
         self.pos = self.pos_last + self.vel*dt
         self.enforce_boundary()
         self.update_velocity()
+
+    def save_date(self, file):
+        with open(str(file)+'_position.txt', 'w') as log:
+            print(self.pos, file = log)
+        with open(str(file)+'_velocity.txt', 'w') as log:
+            print(self.vel, file = log)
+
+
 
     def enforce_boundary(self):
         for i in self.lines:
