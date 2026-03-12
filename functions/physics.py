@@ -14,9 +14,23 @@ def make_polygon_arc(origin, radius, ori, arc, N):
     if ori == False:
         angles = np.flip(angles)
     points = origin + radius*np.e**(1j * angles)
+
     for i in range(N-1):
         lines_list.append(line(points[i], points[i+1]))
     return lines_list
+
+def compute_shortest_line(lines):
+    lengths = np.array([])
+    for i in lines:
+        np.append(lengths, i.lengths)
+    return np.min(lengths)
+
+def weld_lines(lines):
+    length = compute_shortest_line(lines)
+    for i in range(len(lines)):
+        if lines[i].x[1] - lines[i+1].x[0] < length:
+            lines[i+1.x[0]] = lines[i].x[1]
+    return lines
 
 class line:
     def __init__(self, x1, x2):
@@ -26,6 +40,7 @@ class line:
         self.normal = self.make_normal()
         self.angle = self.angle()
         self.x_prime = (self.x - self.x[0]) * np.e**(-1j * self.angle)
+        self.length = np.abs(self.x[1]-self.x[0])
 
     def make_normal(self):
         return self.tangent*1j
@@ -91,7 +106,6 @@ class manifest:
         
         ambiguation_bool = np.logical_and(x_int>0, x_int<=line.x_prime[1])
         disambiguated_mask = detection_mask & ambiguation_bool
-       
 
         return disambiguated_mask, x_int
 
@@ -102,7 +116,7 @@ class manifest:
             if disambiguated_mask[i] == True:
                 pos2[i] = np.conjugate(pos2[i])
                 vel_new[i] = np.conjugate(vel_new[i])
-        pos3 = (pos2)*np.e**(1j * line.angle) + line.x[0]
+        pos3 = (pos2 + 1e-12)*np.e**(1j * line.angle) + line.x[0]
         vel_new = vel_new*np.e**(1j * line.angle)
         return pos3, vel_new
 
