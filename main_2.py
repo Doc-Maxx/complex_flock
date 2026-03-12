@@ -5,14 +5,15 @@ from functions import plotting as plot
 from functions import track_read as rd
 import numpy as np
 
-file = "race_track_gen2"
+file = "test_track"
 
 N = 1
 lines = rd.read_track_gen2(file,0.05)
 m = ph.manifest(0.1, 0.1, 1, 0, lines)
-m.spawn_flockers(N, 0+0j)
-dt = 1
-steps = 2
+#m.spawn_flockers(N, 0+0j)
+m.add_flocker(1+1j, 1+0j)
+dt = 0.1
+steps = 25
 
 print(m.pos)
 

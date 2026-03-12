@@ -82,18 +82,19 @@ class manifest:
 
         ambiguation_bool = np.logical_and(x_int>0, x_int<line.x_prime[0])
         disambiguated_mask = detection_mask & ambiguation_bool
+        print(disambiguated_mask)
         return disambiguated_mask, x_int
 
     def reflect(self, line, disambiguated_mask, x_int):
         pos2 = (self.pos - line.x[0])*np.e**(-1j * line.angle)
         vel_new = self.vel*np.e**(-1j * line.angle)
         for i in range(len(disambiguated_mask)):
+            print(disambiguated_mask[i])
             if disambiguated_mask[i] == True:
                 pos2[i] = np.conjugate(pos2[i])
                 vel_new[i] = np.conjugate(vel_new[i])
         pos3 = (pos2)*np.e**(1j * line.angle) + line.x[0]
-        print(self.pos - pos3)
-        vel_new = self.vel*np.e**(1j * line.angle)
+        vel_new = vel_new*np.e**(1j * line.angle)
         return pos3, vel_new
 
     def update_velocity(self):
@@ -139,3 +140,8 @@ class manifest:
 
         self.pos = positions
         self.vel = velocities
+
+    def add_flocker(self, pos, vel):
+        self.pos = np.append(self.pos, pos)
+        self.vel = np.appen(self.vel, vel)
+        
