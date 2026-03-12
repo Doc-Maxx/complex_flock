@@ -50,12 +50,12 @@ def poly_reader(row, corner_radius):
     ori = str_to_bool(row[3])
     arc = np.array([degree_to_radian(float(row[4].replace(" ",""))), degree_to_radian(float(row[5].replace(" ","")))])
     N = int(row[6])
-    return ph.make_polygon_arc(origin=origin,radius= radius,corner_radius= corner_radius, ori =ori, arc=arc, N=N)
+    return ph.make_polygon_arc(origin=origin,radius= radius, ori =ori, arc=arc, N=N)
 
 def line_reader(row, corner_radius):
     x1 = complex(row[0].replace(" ", ""))
     x2 = complex(row[1].replace(" ", ""))
-    return ph.line(x1, x2, corner_radius)
+    return ph.line(x1, x2)
 
 
 def rect_row_reader(row):

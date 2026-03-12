@@ -8,7 +8,7 @@ def reflect(vec, mirror_vec):
     rot_angle = np.angle(mirror_vec) - np.angle(vec)
     return vec * np.e**(1j * rot_angle * 2)
 
-def make_polygon_arc(origin, radius, corner_radius, ori, arc, N):
+def make_polygon_arc(origin, radius, ori, arc, N):
     lines_list = []
     angles = np.linspace(arc[0],arc[1], N)
     if ori == False:
@@ -26,7 +26,7 @@ class line:
         self.normal = self.make_normal()
         self.region_projection = i_dot(self.x, self.tangent)
         self.angle = self.angle()
-        self.x_prime = (self.x - self.x[0]) * np.e^(-1j * self.angle)
+        self.x_prime = (self.x - self.x[0]) * np.e**(-1j * self.angle)
 
     def make_normal(self):
         return self.tangent*1j
@@ -35,7 +35,7 @@ class line:
         return np.angle(self.tangent)
 
 class manifest:
-    def __init__(self, interaction_radius, target_velocity, follow_factor=1, pressure_factor=0, lines):
+    def __init__(self, interaction_radius, target_velocity, follow_factor, pressure_factor, lines):
         self.pos = np.array([])
         self.pos_last = np.array([])
         self.vel = np.array([])
@@ -71,8 +71,8 @@ class manifest:
         x_int = np.ones(len(detection_mask))*-1
         for i in range(len(detection_mask)):
             if detection_mask[i] == True:
-                pos2 = (self.pos[i] - line.x[0])*np.e^(-1j * line.angle)
-                pos1 = (self.pos_last[i] - line.x[0])*np.e(-1j * line.angle)
+                pos2 = (self.pos[i] - line.x[0])*np.e**(-1j * line.angle)
+                pos1 = (self.pos_last[i] - line.x[0])*np.e**(-1j * line.angle)
                 diff = pos2 - pos1
                 if np.abs(np.real(diff)) < 1e-6:
                     x_int[i] = np.real(pos2)
@@ -87,14 +87,14 @@ class manifest:
         return disambiguated_mask, x_int
 
     def reflect(line, disambiguated_mask, x_int):
-        pos2 = (self.pos_last - line.x[0])*np.e(-1j * line.angle)
-        vel_new = self.vel*np.(-1j * line.angle)
+        pos2 = (self.pos_last - line.x[0])*np.e**(-1j * line.angle)
+        vel_new = self.vel*np.e**(-1j * line.angle)
         for i in range(len(disambiguated_mask)):
             if disambiguated_mask[i] == True:
                 pos2[i] = np.conjugate(pos2[i])
                 vel_new[i] = np.conjugate(vel_new[i])
-        pos2 = (self.pos_last)*np.e(1j * line.angle) + line.x[0]
-        vel_new = self.vel*np.(1j * line.angle)
+        pos2 = (self.pos_last)*np.e**(1j * line.angle) + line.x[0]
+        vel_new = self.vel*np.e**(1j * line.angle)
         return pos2, vel_new
 
     def update_velocity(self):
@@ -125,7 +125,6 @@ class manifest:
 
     def make_tree(self):
         pos_vec = np.array([np.real(self.pos), np.imag(self.pos)]).T
-        print(pos_vec)
         return spp.cKDTree(pos_vec)
 
     def get_hood(self, pos, tree):
