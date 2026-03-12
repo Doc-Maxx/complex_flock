@@ -131,7 +131,7 @@ class manifest:
             point =np.array([ np.real(self.pos[i]) , np.imag(self.pos[i])])
             hood = self.get_hood(point, tree)
             pressure_vec = self.pos[hood] - self.pos[i]
-            vel_contribution[i] = np.average(pressure_vec)
+            vel_contribution[i] = -np.average(pressure_vec)
        # vel_contribution = vel_contribution[:,0] + 1j * vel_contribution[:,1]
         return vel_contribution
 
