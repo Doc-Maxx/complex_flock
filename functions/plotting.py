@@ -67,6 +67,7 @@ def plot_flockers_gen2(manifest, axes):
     vr = np.array([np.real(manifest.vel)])
     vi = np.array([np.imag(manifest.vel)]) 
     ang = np.angle(manifest.vel)
-    quiv = axes.quiver(pr, pi,vr,vi, (ang /(2*np.pi)))
+    #quiv = axes.quiver(pr, pi,vr,vi, (ang /(2*np.pi)))
+    quiv = axes.scatter(pr, pi)
     return quiv
 2

@@ -29,15 +29,16 @@ def weld_lines(lines):
     length = compute_shortest_line(lines)
     
     for i in range(len(lines)):
-        dist = np.abs(lines[i-1].x[1] - lines[i].x[0])
-        print(dist)
-        if dist < length:
-            lines[i].x[0] = lines[i-1].x[1]
+        for j in range(len(lines)):
+            dist = np.abs(lines[i].x[1] - lines[j].x[0])
+            if dist < length:
+                lines[i].x[1] = lines[j].x[0]
+            
     return lines
 
 class line:
     def __init__(self, x1, x2):
-        self.x = np.array([x1,x2])
+        self.x = np.array([x1+1+1j,x2+1+1j])
         self.mag_x = np.abs(self.x)
         self.tangent = (self.x[1] - self.x[0])/np.abs(self.x[1] - self.x[0])
         self.normal = self.make_normal()
@@ -107,7 +108,7 @@ class manifest:
                     b = np.imag(pos1) - m * np.real(pos1)
                     x_int[i] = (m * np.real(pos1) - np.imag(pos1)) / m
         
-        ambiguation_bool = np.logical_and(x_int>0, x_int<=line.x_prime[1])
+        ambiguation_bool = np.logical_and(x_int>=0, x_int<=line.x_prime[1])
         disambiguated_mask = detection_mask & ambiguation_bool
 
         return disambiguated_mask, x_int
@@ -119,7 +120,7 @@ class manifest:
             if disambiguated_mask[i] == True:
                 pos2[i] = np.conjugate(pos2[i])
                 vel_new[i] = np.conjugate(vel_new[i])
-        pos3 = (pos2 + 1e-12)*np.e**(1j * line.angle) + line.x[0]
+        pos3 = (pos2 + 1e-2)*np.e**(1j * line.angle) + line.x[0]
         vel_new = vel_new*np.e**(1j * line.angle)
         return pos3, vel_new
 
