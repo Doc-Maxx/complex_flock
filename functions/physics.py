@@ -48,7 +48,7 @@ class manifest:
         self.pos_last = self.pos
         self.pos = self.pos_last + self.vel*dt
         self.enforce_boundary()
-        #self.update_velocity()
+        self.update_velocity()
 
     def enforce_boundary(self):
         for i in self.lines:
