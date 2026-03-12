@@ -142,5 +142,5 @@ class manifest:
         positions = np.random.rand(N,2).view(np.complex128).flatten() + origin
         velocities = np.random.rand(N,2).view(np.complex128).flatten()
 
-        self.pos = positions
+        self.pos_last = positions
         self.vel = velocities
