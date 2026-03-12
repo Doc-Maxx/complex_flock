@@ -34,7 +34,7 @@ class line:
         return np.angle(self.tangent)
 
 class manifest:
-    def __init__(self, interaction_radius, target_velocity, follow_factor, pressure_factor, lines):
+    def __init__(self, interaction_radius, target_velocity, follow_factor, pressure_factor, lines, log_name):
         self.pos = np.array([])
         self.pos_last = np.array([])
         self.vel = np.array([])
@@ -43,9 +43,10 @@ class manifest:
         self.lines = lines
         self.follow_factor = follow_factor
         self.pressure_factor = pressure_factor
+        self.log_name = log_name
 
     def step(self, dt):
-        self.save_date("test")
+        self.save_date(str(self.log_name))
         self.pos_last = self.pos
         self.pos = self.pos_last + self.vel*dt
         self.enforce_boundary()
@@ -56,8 +57,6 @@ class manifest:
             np.savetxt(log, self.pos, delimiter=",", newline ='\n')
         with open('logs/' +str(file)+'_velocity.log', 'a') as log:
             np.savetxt(log,self.vel,delimiter=",", newline='\n')
-
-
 
     def enforce_boundary(self):
         for i in self.lines:
