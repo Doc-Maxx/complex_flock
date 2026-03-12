@@ -99,8 +99,8 @@ class manifest:
 
     def update_velocity(self):
         tree = self.make_tree()
-        fol = self.follow_neighbors(tree) * follow_factor
-        pre = self.pressure(tree) * pressure_factor
+        fol = self.follow_neighbors(tree) * self.follow_factor
+        pre = self.pressure(tree) * self.pressure_factor
         self.vel = fol + pre
 
        
@@ -108,7 +108,7 @@ class manifest:
         vel = self.vel
         vel_contribution = self.vel*0
         for i in range(len(self.pos)):
-            hood = self.get_hood(self.pos[i], tree)
+            hood = self.get_hood([np.real(self.pos[i]),np.imag(self.pos[i])], tree)
             vel_contribution[i] = np.average(vel[hood])
         return vel_contribution
 
@@ -117,7 +117,7 @@ class manifest:
         return spp.cKDTree(pos_vec)
 
     def get_hood(self, pos, tree):
-        return tree.query_ball_point(point, r = self.interaction_radius)
+        return tree.query_ball_point(pos, r = self.interaction_radius)
 
     def pressure(self, tree):
         vel_contribution = self.vel*0
