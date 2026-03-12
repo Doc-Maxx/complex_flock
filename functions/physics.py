@@ -54,20 +54,20 @@ class manifest:
 
     def enforce_boundary(self):
         for i in self.lines:
-            detection_mask = self.detection(i)
+            detection_mask = self.detection(line= i)
             disambiguated_mask, x_int = self.disambiguation(i, detection_mask)
             pos_update, vel_update = self.reflect(i, disambiguated_mask, x_int)
             self.pos = pos_update
             self.vel = vel_update
-
-    def detection(line):
+    
+    def detection(self, line):
         before_ = i_dot(line.normal, self.pos_last)
         after_ = i_dot(line.normal, self.pos)
         before_bool = np.greater(before_, 0)
         after_bool = np.less_equal(after_, 0)
         return before_bool & after_bool
 
-    def disambiguation(line, detection_mask):
+    def disambiguation(self, line, detection_mask):
         x_int = np.ones(len(detection_mask))*-1
         for i in range(len(detection_mask)):
             if detection_mask[i] == True:
@@ -86,7 +86,7 @@ class manifest:
 
         return disambiguated_mask, x_int
 
-    def reflect(line, disambiguated_mask, x_int):
+    def reflect(self, line, disambiguated_mask, x_int):
         pos2 = (self.pos_last - line.x[0])*np.e**(-1j * line.angle)
         vel_new = self.vel*np.e**(-1j * line.angle)
         for i in range(len(disambiguated_mask)):
@@ -98,23 +98,12 @@ class manifest:
         return pos2, vel_new
 
     def update_velocity(self):
-        reg = self.regulate()
         tree = self.make_tree()
         fol = self.follow_neighbors(tree) * follow_factor
         pre = self.pressure(tree) * pressure_factor
-        self.vel = reg + fol + pre
+        self.vel = fol + pre
 
-    def regulate(self):
-        mags = np.abs(self.vel)
-        fast_mask = np.where(mags>self.target_velocity*(1 + 0.03))
-        slow_mask = np.where(mags<self.target_velocity*(1 - 0.03))
-        vel_contribution = self.vel*0
-        for i in self.vel[fast_mask]:
-            vel_contribution[i] = i*(1-0.01)
-        for i in self.vel[slow_mask]:
-            vel_contribution[i] = i*(1+0.01)
-        return vel_contribution
-
+       
     def follow_neighbors(self, tree):
         vel = self.vel
         vel_contribution = self.vel*0
