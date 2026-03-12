@@ -59,10 +59,11 @@ class manifest:
             self.vel = vel_update
     
     def detection(self, line):
-        before_ = i_dot(line.normal, self.pos_last)
-        after_ = i_dot(line.normal, self.pos)
+        before_ = i_dot(line.normal, self.pos_last-line.x[0])
+        after_ = i_dot(line.normal, self.pos-line.x[0])
         before_bool = np.greater(before_, 0)
         after_bool = np.less_equal(after_, 0)
+
         detection_bool = before_bool & after_bool
         return detection_bool
 
@@ -79,17 +80,17 @@ class manifest:
                     m = np.imag(diff)/np.real(diff)
                     b = np.imag(pos1) - m * np.real(pos1)
                     x_int[i] = (m * np.real(pos1) - np.imag(pos1)) / m
-
-        ambiguation_bool = np.logical_and(x_int>0, x_int<line.x_prime[0])
+        
+        ambiguation_bool = np.logical_and(x_int>0, x_int<line.x_prime[1])
         disambiguated_mask = detection_mask & ambiguation_bool
-        print(disambiguated_mask)
+       
+
         return disambiguated_mask, x_int
 
     def reflect(self, line, disambiguated_mask, x_int):
         pos2 = (self.pos - line.x[0])*np.e**(-1j * line.angle)
         vel_new = self.vel*np.e**(-1j * line.angle)
         for i in range(len(disambiguated_mask)):
-            print(disambiguated_mask[i])
             if disambiguated_mask[i] == True:
                 pos2[i] = np.conjugate(pos2[i])
                 vel_new[i] = np.conjugate(vel_new[i])
@@ -143,5 +144,5 @@ class manifest:
 
     def add_flocker(self, pos, vel):
         self.pos = np.append(self.pos, pos)
-        self.vel = np.appen(self.vel, vel)
+        self.vel = np.append(self.vel, vel)
         

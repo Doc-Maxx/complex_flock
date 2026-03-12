@@ -12,12 +12,12 @@ lines = rd.read_track_gen2(file,0.05)
 m = ph.manifest(0.1, 0.1, 1, 0, lines)
 #m.spawn_flockers(N, 0+0j)
 m.add_flocker(1+1j, 1+0j)
-dt = 0.1
+dt = 0.3
 steps = 25
 
 print(m.pos)
 
-plot.plot_gen2(m, file="test init")
+plot.plot_gen2(m, file="read_track_gen2")
 for i in range(steps):
     m.step(dt)
     plot.plot_gen2(m, file="test step: " + str(i))
