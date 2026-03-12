@@ -9,6 +9,10 @@ __pycache__/
 # images
 *.png
 
+# logs
+*.log
+
+
 # Distribution / packaging
 .Python
 build/

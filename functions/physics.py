@@ -52,9 +52,9 @@ class manifest:
         self.update_velocity()
 
     def save_date(self, file):
-        with open('logs/' +str(file)+'_position.txt', 'a') as log:
+        with open('logs/' +str(file)+'_position.log', 'a') as log:
             np.savetxt(log, self.pos, delimiter=",", newline ='\n')
-        with open('logs/' +str(file)+'_velocity.txt', 'a') as log:
+        with open('logs/' +str(file)+'_velocity.log', 'a') as log:
             np.savetxt(log,self.vel,delimiter=",", newline='\n')
 
 
