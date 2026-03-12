@@ -7,15 +7,19 @@ import numpy as np
 
 file = "race_track_gen2"
 
-N = 40
+N = 1
 lines = rd.read_track_gen2(file,0.05)
 m = ph.manifest(0.1, 0.1, 1, 0, lines)
 m.spawn_flockers(N, 0+0j)
 dt = 1
 steps = 10
 
+print(m.pos)
+
 plot.plot_gen2(m, file="test init")
 for i in range(steps):
     m.step(dt)
+    plot.plot_gen2(m, file="test step: " + str(i))
+    print([m.pos_last,m.pos,m.vel])
 plot.plot_gen2(m, file="test final")
 

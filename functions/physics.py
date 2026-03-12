@@ -24,7 +24,6 @@ class line:
         self.mag_x = np.abs(self.x)
         self.tangent = (self.x[1] - self.x[0])/np.abs(self.x[1] - self.x[0])
         self.normal = self.make_normal()
-        self.region_projection = i_dot(self.x, self.tangent)
         self.angle = self.angle()
         self.x_prime = (self.x - self.x[0]) * np.e**(-1j * self.angle)
 
@@ -46,11 +45,10 @@ class manifest:
         self.pressure_factor = pressure_factor
 
     def step(self, dt):
+        self.pos_last = self.pos
         self.pos = self.pos_last + self.vel*dt
         self.enforce_boundary()
-        self.pos_last = self.pos
-        self.update_velocity()
-        
+        #self.update_velocity()
 
     def enforce_boundary(self):
         for i in self.lines:
@@ -102,8 +100,12 @@ class manifest:
         fol = self.follow_neighbors(tree) * self.follow_factor
         pre = self.pressure(tree) * self.pressure_factor
         self.vel = fol + pre
+        self.vel_reg()
 
-       
+    def vel_reg(self):
+        np.where(self.vel > self.target_velocity*(1 + 0.03), self.vel*(1 - 0.1), self.vel )
+        np.where(self.vel < self.target_velocity*(1 - 0.03), self.vel*(1+0.1), self.vel )
+
     def follow_neighbors(self, tree):
         vel = self.vel
         vel_contribution = self.vel*0
@@ -134,5 +136,5 @@ class manifest:
         positions = np.random.rand(N,2).view(np.complex128).flatten() + origin
         velocities = np.random.rand(N,2).view(np.complex128).flatten()
 
-        self.pos_last = positions
+        self.pos = positions
         self.vel = velocities
