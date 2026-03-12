@@ -15,7 +15,7 @@ def make_polygon_arc(origin, radius, ori, arc, N):
         angles = np.flip(angles)
     points = origin + radius*np.e**(1j * angles)
     for i in range(N-1):
-        lines_list.append(line(points[i], points[i+1], corner_radius))
+        lines_list.append(line(points[i], points[i+1]))
     return lines_list
 
 class line:
